@@ -1,0 +1,17 @@
+{
+    "name": "process-runner",
+    "version-string": "1.0",
+    "dependencies": [
+        "catch2",
+        "spdlog",
+        "abseil",
+        {
+            "name": "poco",
+            "features": [
+                "netssl"
+            ]
+        },
+        "magic-enum",
+        "grpc"
+    ]
+}
