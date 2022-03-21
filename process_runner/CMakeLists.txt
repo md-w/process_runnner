@@ -4,23 +4,23 @@
 
 find_package(Poco REQUIRED Foundation Util)
 
-add_library(pipeline STATIC
-    src/pipeline.cpp
+add_library(process_runner STATIC
+    src/process_runner.cpp
 )
 
-target_precompile_headers(pipeline
-    PUBLIC inc/pipeline.h
+target_precompile_headers(process_runner
+    PUBLIC inc/process_runner.h
 )
 
-target_include_directories(pipeline
+target_include_directories(process_runner
     PUBLIC inc
 )
 
-target_link_libraries(pipeline
+target_link_libraries(process_runner
     PUBLIC vlogger
     PRIVATE Poco::Foundation
     PRIVATE Poco::Util
 )
 
-set_property(TARGET pipeline PROPERTY
+set_property(TARGET process_runner PROPERTY
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

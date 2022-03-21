@@ -3,13 +3,14 @@
 # *****************************************************
 
 cmake_minimum_required (VERSION 3.20)
-find_package(Protobuf COMPONENTS libprotobuf protoc)
-find_package(gRPC REQUIRED)
+
+find_package(gRPC REQUIRED) # use protobuf implicitly
 
 #
 # Compile protobuf and grpc files in myproto target to cpp
 #
 get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
+
 
 # protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS interfaces/process_runner.proto)
 
@@ -19,14 +20,9 @@ set(PROTO_FILES
 
 add_library(data_models_protobuf_helper STATIC
     src/protobuf_helper.cpp
-
-    # ${PROTO_SRCS}
-    # ${PROTO_FILES}
 )
 
 target_precompile_headers(data_models_protobuf_helper
-  # PUBLIC ${PROTO_HDRS}
-  # PUBLIC ${PROTO_FILES}
   PUBLIC inc/protobuf_helper.h
 )
 
@@ -36,7 +32,6 @@ target_include_directories(data_models_protobuf_helper
 )
 
 target_link_libraries(data_models_protobuf_helper
-  PUBLIC protobuf::libprotobuf
   PUBLIC gRPC::grpc
   PUBLIC gRPC::grpc++
 )
@@ -49,7 +44,7 @@ protobuf_generate(TARGET data_models_protobuf_helper
   PROTOS ${PROTO_FILES}
   LANGUAGE grpc
   GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
-  PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}"
+  PLUGIN protoc-gen-grpc=${grpc_cpp_plugin_location}
 )
 
 set_target_properties(

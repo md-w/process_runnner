@@ -3,16 +3,15 @@
 // *****************************************************
 
 #pragma once
-#ifndef process_runner_h
-#define process_runner_h
+#ifndef process_runner_service_run_h
+#define process_runner_service_run_h
 #include <atomic>
+#include <grpcpp/server_builder.h>
 #include <memory>
 #include <string>
 #include <thread>
 
-#include "process_runner_service.h"
-
-class ProcessRunner
+class ProcessRunnerServiceRun
 {
 private:
   std::unique_ptr<std::thread> _thread;
@@ -20,9 +19,9 @@ private:
   std::unique_ptr<grpc::Server> server;
 
 public:
-  ProcessRunner();
-  ~ProcessRunner();
+  ProcessRunnerServiceRun();
+  ~ProcessRunnerServiceRun();
   void signal_to_stop();
 };
 
-#endif // process_runner_h
+#endif // process_runner_service_run_h

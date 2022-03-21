@@ -21,7 +21,7 @@ target_link_libraries(entry_point_client
     PRIVATE vlogger
     PRIVATE vutilities
     PRIVATE data_models
-    PRIVATE pipeline_remote
+    PRIVATE process_runner_client
 )
 
 set_property(TARGET entry_point_client PROPERTY

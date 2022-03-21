@@ -19,7 +19,7 @@ target_link_libraries(entry_point_server
     PRIVATE vlogger
     PRIVATE vutilities
     PRIVATE data_models
-    PRIVATE pipeline
+    PRIVATE process_runner
     PRIVATE process_runner_service
 )
 set_property(TARGET entry_point_server PROPERTY

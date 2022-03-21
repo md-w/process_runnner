@@ -9,9 +9,9 @@
 #include "Version.h"
 #include "globalerrorhandler.h"
 #include "logging.h"
+#include "process_runner_client.h"
 #include "utilities.h"
 #include "version_info.h"
-#include "pipeline_remote.h"
 
 class entry_point : public Poco::Util::ServerApplication
 {
@@ -76,10 +76,7 @@ protected:
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
   }
 
-  void defineOptions(Poco::Util::OptionSet& options) override
-  {
-    ServerApplication::defineOptions(options);
-  }
+  void defineOptions(Poco::Util::OptionSet& options) override { ServerApplication::defineOptions(options); }
 
   void handle_option(const std::string& name, const std::string& value) {}
 
@@ -170,11 +167,11 @@ public:
     load_first_configuration();
     {
       std::vector<std::string> args;
-      args.push_back("-i");
-      args.push_back("rtmp://192.168.1.1:9001");
-      args.push_back("-o");
-      args.push_back("./videos");
-      PipelineRemote pipeline_remote("media_converter", args);
+      args.emplace_back("-i");
+      args.emplace_back("rtmp://192.168.1.1:9001");
+      args.emplace_back("-o");
+      args.emplace_back("./videos");
+      ProcessRunnerClient process_runner_client("media_converter", args);
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";

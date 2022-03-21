@@ -3,17 +3,19 @@
 // *****************************************************
 
 #pragma once
-#ifndef pipeline_remote_h
-#define pipeline_remote_h
+#ifndef process_runner_h
+#define process_runner_h
+#include <Poco/Process.h>
 #include <atomic>
 #include <future>
 #include <memory>
 #include <mutex>
 #include <thread>
 
-class PipelineRemote
+class ProcessRunner
 {
 private:
+  static std::string initial_directory;
   std::atomic_bool _do_shutdown{false};
   std::atomic_bool _is_internal_shutdown{false};
   std::atomic_int _last_exit_code{-1};
@@ -28,9 +30,7 @@ private:
   std::string _initial_directory;
 
   std::string _composite_command{};
-
-  // std::unique_ptr<Poco::ProcessHandle> _process_handle;
-
+  std::unique_ptr<Poco::ProcessHandle> _process_handle;
   std::mutex _thread_running_mutex;
   std::condition_variable _thread_running_cv;
   bool _is_thread_running{false};
@@ -39,11 +39,14 @@ private:
   void run();
 
 public:
-  PipelineRemote(std::string command, std::vector<std::string> args);
-  ~PipelineRemote();
+  static void set_initial_directory(const std::string& initial_directory_);
+  static std::string get_initial_directory();
+  ProcessRunner(std::string command, std::vector<std::string> args,
+                std::string initial_directory = ProcessRunner::get_initial_directory());
+  ~ProcessRunner();
   void signal_to_stop();
   bool is_running();
   int get_last_exit_code();
+  int get_id();
 };
-
-#endif // pipeline_remote_h
+#endif // process_runner_h

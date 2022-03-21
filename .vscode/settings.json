@@ -94,6 +94,7 @@
         "filesystem": "cpp",
         "fstream": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "*.tcc": "cpp"
     },
 }

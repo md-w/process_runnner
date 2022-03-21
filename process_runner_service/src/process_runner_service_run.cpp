@@ -2,12 +2,17 @@
 //    Copyright 2022 Videonetics Technology Pvt Ltd
 // *****************************************************
 
-#include "process_runner.h"
+#include "process_runner_service_run.h"
 #include "logging.h"
+#include "process_runner_service.h"
 
-ProcessRunner::ProcessRunner() { _thread = std::make_unique<std::thread>(&ProcessRunner::run, this); }
 
-ProcessRunner::~ProcessRunner()
+ProcessRunnerServiceRun::ProcessRunnerServiceRun()
+{
+  _thread = std::make_unique<std::thread>(&ProcessRunnerServiceRun::run, this);
+}
+
+ProcessRunnerServiceRun::~ProcessRunnerServiceRun()
 {
   signal_to_stop();
   if (_thread->joinable()) {
@@ -15,14 +20,14 @@ ProcessRunner::~ProcessRunner()
   }
 }
 
-void ProcessRunner::signal_to_stop()
+void ProcessRunnerServiceRun::signal_to_stop()
 {
   if (server) {
     server->Shutdown();
   }
 }
 
-void ProcessRunner::run()
+void ProcessRunnerServiceRun::run()
 {
   RAY_LOG_INF << "Started";
   ::grpc::ServerBuilder builder;

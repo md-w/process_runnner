@@ -6,7 +6,7 @@ find_package(gRPC REQUIRED)
 
 add_library(process_runner_service
     src/process_runner_service.cpp
-    src/process_runner.cpp
+    src/process_runner_service_run.cpp
 )
 
 target_include_directories(process_runner_service
@@ -18,7 +18,7 @@ target_link_libraries(process_runner_service
     PRIVATE vlogger
     PRIVATE vutilities
     PRIVATE data_models
-    PRIVATE pipeline
+    PRIVATE process_runner
 )
 
 set_property(TARGET process_runner_service PROPERTY

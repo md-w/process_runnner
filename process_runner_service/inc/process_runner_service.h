@@ -7,7 +7,6 @@
 #define process_runner_service_h
 
 #include <grpc/grpc.h>
-#include <grpcpp/server_builder.h>
 
 #include "interfaces/process_runner.grpc.pb.h"
 #include "interfaces/process_runner.pb.h"

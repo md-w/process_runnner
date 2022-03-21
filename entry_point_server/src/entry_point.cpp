@@ -9,7 +9,7 @@
 #include "Version.h"
 #include "globalerrorhandler.h"
 #include "logging.h"
-#include "process_runner.h"
+#include "process_runner_service_run.h"
 #include "utilities.h"
 #include "version_info.h"
 
@@ -166,7 +166,7 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
-      std::unique_ptr<ProcessRunner> process_runner = std::make_unique<ProcessRunner>();
+      std::unique_ptr<ProcessRunnerServiceRun> process_runner = std::make_unique<ProcessRunnerServiceRun>();
       waitForTerminationRequest();
       process_runner->signal_to_stop();
     }

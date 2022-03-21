@@ -3,11 +3,18 @@
 // *****************************************************
 
 #include <Poco/Exception.h>
+#include <Poco/Path.h>
+#include <sstream>
 
-#include "pipeline_remote.h"
+#include "logging.h"
+#include "process_runner.h"
 
-PipelineRemote::PipelineRemote(std::string command, std::vector<std::string> args)
-    : _command(std::move(command)), _args(std::move(args))
+std::string ProcessRunner::initial_directory{Poco::Path::current()};
+void ProcessRunner::set_initial_directory(const std::string& initial_directory_) { initial_directory = initial_directory_; }
+std::string ProcessRunner::get_initial_directory() { return initial_directory; }
+
+ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args, std::string initial_directory)
+    : _command(std::move(command)), _args(std::move(args)), _initial_directory(std::move(initial_directory))
 {
   std::stringstream ss;
   ss << "[";
@@ -21,16 +28,13 @@ PipelineRemote::PipelineRemote(std::string command, std::vector<std::string> arg
   _composite_command = ss.str();
   start();
 }
-
-PipelineRemote::~PipelineRemote() { stop(); }
-
-void PipelineRemote::start()
+ProcessRunner::~ProcessRunner() { stop(); }
+void ProcessRunner::start()
 {
-  //_thread = std::make_unique<std::thread>(&Pipeline::run, this);
-  _thread = std::make_unique<std::future<void>>(std::async(std::launch::async, &PipelineRemote::run, this));
+  //_thread = std::make_unique<std::thread>(&ProcessRunner::run, this);
+  _thread = std::make_unique<std::future<void>>(std::async(std::launch::async, &ProcessRunner::run, this));
 }
-
-void PipelineRemote::signal_to_stop()
+void ProcessRunner::signal_to_stop()
 {
   std::unique_lock<std::mutex> lock_thread_running(_thread_running_mutex);
   if (!_is_thread_running) {
@@ -38,15 +42,14 @@ void PipelineRemote::signal_to_stop()
   }
 
   _do_shutdown = true;
-  //   if (_process_handle) {
-  //     if (_process_handle->id() > 0) {
-  //       RAY_LOG_INF << "signal_to_stop called";
-  //       Poco::Process::requestTermination(_process_handle->id());
-  //     }
-  //   }
+  if (_process_handle) {
+    if (_process_handle->id() > 0) {
+      RAY_LOG_INF << "signal_to_stop called";
+      Poco::Process::requestTermination(_process_handle->id());
+    }
+  }
 }
-
-void PipelineRemote::stop()
+void ProcessRunner::stop()
 {
   if (_is_already_shutting_down) {
     return;
@@ -61,16 +64,15 @@ void PipelineRemote::stop()
   // }
   if (_thread) {
     if (_thread->wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
-      //   if (_process_handle) {
-      //     Poco::Process::kill(*_process_handle);
-      //   }
+      if (_process_handle) {
+        Poco::Process::kill(*_process_handle);
+      }
       _thread->wait();
     }
     _thread = nullptr;
   }
 }
-
-void PipelineRemote::run()
+void ProcessRunner::run()
 {
 
   RAY_LOG_INF << "Thread Started for " << _composite_command << " from: " << _initial_directory;
@@ -79,8 +81,8 @@ void PipelineRemote::run()
     {
       std::lock_guard<std::mutex> lock_thread_running(_thread_running_mutex);
       try {
-        // _process_handle =
-        //     std::make_unique<Poco::ProcessHandle>(Poco::Process::launch(_command, _args, _initial_directory));
+        _process_handle =
+            std::make_unique<Poco::ProcessHandle>(Poco::Process::launch(_command, _args, _initial_directory));
       } catch (Poco::Exception& e) {
         RAY_LOG_ERR << "MONOTOSH:: Poco::Exception " << e.what();
       } catch (const std::exception& e) {
@@ -90,16 +92,16 @@ void PipelineRemote::run()
       _thread_running_cv.notify_all();
     }
 
-    // if (_process_handle) {
-    //   if (_process_handle->id() > 0) {
-    //     _last_exit_code = 0;
-    //     _last_exit_code = _process_handle->wait();
-    //     // RAY_LOG_INF << "Process returned with:: " << exit_code;
-    //     _process_handle = nullptr;
-    //   }
-    // } else {
-    //   break;
-    // }
+    if (_process_handle) {
+      if (_process_handle->id() > 0) {
+        _last_exit_code = 0;
+        _last_exit_code = _process_handle->wait();
+        // RAY_LOG_INF << "Process returned with:: " << exit_code;
+        _process_handle = nullptr;
+      }
+    } else {
+      break;
+    }
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   // try {
@@ -118,7 +120,7 @@ void PipelineRemote::run()
   // RAY_LOG_INF << "Thread Stopped for " << _composite_command;
 }
 
-bool PipelineRemote::is_running()
+bool ProcessRunner::is_running()
 {
   // RAY_LOG_INF << "is running started";
   std::unique_lock<std::mutex> lock_thread_running(_thread_running_mutex);
@@ -126,13 +128,13 @@ bool PipelineRemote::is_running()
     _thread_running_cv.wait(lock_thread_running);
   }
   // RAY_LOG_INF << "is running returned";
-  //   if (_process_handle) {
-  //     if (_process_handle->id() > 0) {
-  //       return true;
-  //     }
-  //   }
+  if (_process_handle) {
+    if (_process_handle->id() > 0) {
+      return true;
+    }
+  }
 
   return false;
 }
 
-int PipelineRemote::get_last_exit_code() { return _last_exit_code; }
+int ProcessRunner::get_last_exit_code() { return _last_exit_code; }
