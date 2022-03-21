@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.data_models.ProcessRunner";
+option java_outer_classname = "ProcessRunnerProto";
+option objc_class_prefix = "PR";
+
+package data_models;
+
+// The greeting service definition.
+service ProcessRunner {
+  // Sends a greeting
+  rpc RunProcess (ProcessRunnerRequest) returns (ProcessRunnerResponse) {}
+  rpc SignalToStop (SignalToStopRequest) returns (SignalToStopResponse) {}
+  rpc IsRunning (IsRunningRequest) returns (IsRunningResponse) {}
+  rpc GetLastExitCode (GetLastExitCodeRequest) returns (GetLastExitCodeResponse) {}
+  rpc GetId (GetIdRequest) returns (GetIdResponse) {}
+}
+
+// The request message containing the command and arguments.
+message ProcessRunnerRequest {
+  string command = 1;
+  repeated string args = 2;
+}
+
+// The response message containing the greetings
+message ProcessRunnerResponse {
+  int64 exit_code = 1;
+  string message = 2;
+}
+
+message SignalToStopRequest {
+
+}
+
+message SignalToStopResponse {
+
+}
+
+message IsRunningRequest {
+
+}
+
+message IsRunningResponse {
+  bool value = 1;
+}
+
+message GetLastExitCodeRequest {
+
+}
+
+message GetLastExitCodeResponse {
+  int64 value = 1;
+}
+
+message GetIdRequest {
+
+}
+
+message GetIdResponse {
+  int64 value = 1;
+}

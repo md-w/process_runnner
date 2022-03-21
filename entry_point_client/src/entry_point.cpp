@@ -11,6 +11,7 @@
 #include "logging.h"
 #include "utilities.h"
 #include "version_info.h"
+#include "pipeline_remote.h"
 
 class entry_point : public Poco::Util::ServerApplication
 {
@@ -168,6 +169,12 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
+      std::vector<std::string> args;
+      args.push_back("-i");
+      args.push_back("rtmp://192.168.1.1:9001");
+      args.push_back("-o");
+      args.push_back("./videos");
+      PipelineRemote pipeline_remote("media_converter", args);
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";

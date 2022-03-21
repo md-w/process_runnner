@@ -9,6 +9,7 @@
 #include "Version.h"
 #include "globalerrorhandler.h"
 #include "logging.h"
+#include "process_runner.h"
 #include "utilities.h"
 #include "version_info.h"
 
@@ -75,11 +76,7 @@ protected:
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
   }
 
-  void defineOptions(Poco::Util::OptionSet& options) override
-  {
-    ServerApplication::defineOptions(options);
-
-  }
+  void defineOptions(Poco::Util::OptionSet& options) override { ServerApplication::defineOptions(options); }
 
   void handle_option(const std::string& name, const std::string& value) {}
 
@@ -169,7 +166,9 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
+      std::unique_ptr<ProcessRunner> process_runner = std::make_unique<ProcessRunner>();
       waitForTerminationRequest();
+      process_runner->signal_to_stop();
     }
     RAY_LOG_INF << "Stopped";
     return Application::EXIT_OK;
