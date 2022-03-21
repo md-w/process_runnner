@@ -6,10 +6,12 @@ find_package(Poco REQUIRED Foundation Util)
 
 add_library(process_runner STATIC
     src/process_runner.cpp
+    src/process_runner_manager.cpp
 )
 
 target_precompile_headers(process_runner
     PUBLIC inc/process_runner.h
+    PUBLIC inc/process_runner_manager.h
 )
 
 target_include_directories(process_runner
