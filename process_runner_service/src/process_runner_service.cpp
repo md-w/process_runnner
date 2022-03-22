@@ -116,3 +116,43 @@
 
   return ::grpc::Status::OK;
 }
+
+::grpc::Status ProcessRunnerService::GetCompositeCommand(::grpc::ServerContext* context,
+                                                         const data_models::GetCompositeCommandRequest* request,
+                                                         data_models::GetCompositeCommandResponse* response)
+{
+  bool is_found = false;
+  std::size_t key = request->key();
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    response->set_value(process_runner_map.at(key)->get_composite_command());
+    is_found = true;
+  }
+  if (is_found) {
+    response->set_error_code(0);
+  } else {
+    response->set_error_code(1);
+  }
+  response->set_key(key);
+
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status ProcessRunnerService::GetInitialDirectory(::grpc::ServerContext* context,
+                                                         const data_models::GetInitialDirectoryRequest* request,
+                                                         data_models::GetInitialDirectoryResponse* response)
+{
+  bool is_found = false;
+  std::size_t key = request->key();
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    response->set_value(process_runner_map.at(key)->get_initial_directory());
+    is_found = true;
+  }
+  if (is_found) {
+    response->set_error_code(0);
+  } else {
+    response->set_error_code(1);
+  }
+  response->set_key(key);
+
+  return ::grpc::Status::OK;
+}

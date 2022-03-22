@@ -15,6 +15,8 @@ service ProcessRunner {
   rpc IsRunning (IsRunningRequest) returns (IsRunningResponse) {}
   rpc GetLastExitCode (GetLastExitCodeRequest) returns (GetLastExitCodeResponse) {}
   rpc GetId (GetIdRequest) returns (GetIdResponse) {}
+  rpc GetCompositeCommand (GetCompositeCommandRequest) returns (GetCompositeCommandResponse) {}
+  rpc GetInitialDirectory (GetInitialDirectoryRequest) returns (GetInitialDirectoryResponse) {}
 }
 
 // The request message containing the command and arguments.
@@ -68,4 +70,24 @@ message GetIdResponse {
   int64 key = 1;
   int64 error_code = 2;
   int64 value = 3;
+}
+
+message GetCompositeCommandRequest {
+  int64 key = 1;
+}
+
+message GetCompositeCommandResponse {
+  int64 key = 1;
+  int64 error_code = 2;
+  string value = 3;
+}
+
+message GetInitialDirectoryRequest {
+  int64 key = 1;
+}
+
+message GetInitialDirectoryResponse {
+  int64 key = 1;
+  int64 error_code = 2;
+  string value = 3;
 }

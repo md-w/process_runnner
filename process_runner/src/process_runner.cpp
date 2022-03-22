@@ -14,7 +14,7 @@ void ProcessRunner::set_initial_directory(const std::string& initial_directory_)
 {
   initial_directory = initial_directory_;
 }
-std::string ProcessRunner::get_initial_directory() { return initial_directory; }
+std::string ProcessRunner::get_initial_directory() { return _initial_directory; }
 
 ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args, std::string initial_directory)
     : _command(std::move(command)), _args(std::move(args)), _initial_directory(std::move(initial_directory))
@@ -132,3 +132,4 @@ int ProcessRunner::get_id()
   }
   return -1;
 }
+std::string ProcessRunner::get_composite_command() { return _composite_command; }

@@ -17,6 +17,16 @@ struct ProcessRunnerArguments {
   std::vector<std::string> args;
 };
 std::size_t hash_value(ProcessRunnerArguments const& s);
+
+class IProcessRunner
+{
+  virtual void signal_to_stop() = 0;
+  virtual bool is_running() = 0;
+  virtual int get_last_exit_code() = 0;
+  virtual int get_id() = 0;
+  virtual std::string get_composite_command() = 0;
+  virtual std::string get_initial_directory() = 0;
+};
 } // namespace data_models
 
 // custom specialization of std::hash can be injected in namespace std

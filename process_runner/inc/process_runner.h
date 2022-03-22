@@ -12,7 +12,8 @@
 #include <mutex>
 #include <thread>
 
-class ProcessRunner
+#include "data_models.h"
+class ProcessRunner : public data_models::IProcessRunner
 {
 private:
   static std::string initial_directory;
@@ -40,13 +41,15 @@ private:
 
 public:
   static void set_initial_directory(const std::string& initial_directory_);
-  static std::string get_initial_directory();
+
   ProcessRunner(std::string command, std::vector<std::string> args,
-                std::string initial_directory = ProcessRunner::get_initial_directory());
-  ~ProcessRunner();
+                std::string initial_directory = ProcessRunner::initial_directory);
+  virtual ~ProcessRunner();
   void signal_to_stop();
   bool is_running();
   int get_last_exit_code();
   int get_id();
+  std::string get_composite_command();
+  std::string get_initial_directory();
 };
 #endif // process_runner_h

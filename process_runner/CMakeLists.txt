@@ -17,7 +17,8 @@ target_include_directories(process_runner
 )
 
 target_link_libraries(process_runner
-    PUBLIC vlogger
+    PUBLIC data_models
+    PRIVATE vlogger
     PRIVATE Poco::Foundation
     PRIVATE Poco::Util
 )
