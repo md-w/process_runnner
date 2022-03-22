@@ -17,8 +17,8 @@ class ProcessRunnerService final : public data_models::ProcessRunner::Service
 private:
   std::map<std::size_t, std::unique_ptr<ProcessRunner>> process_runner_map;
 public:
-  ::grpc::Status RunProcess(::grpc::ServerContext* context, const data_models::ProcessRunnerRequest* request,
-                          data_models::ProcessRunnerResponse* response) override;
+  ::grpc::Status RunProcess(::grpc::ServerContext* context, const data_models::RunProcessRequest* request,
+                          data_models::RunProcessResponse* response) override;
 
   ::grpc::Status SignalToStop(::grpc::ServerContext* context, const data_models::SignalToStopRequest* request,
                                data_models::SignalToStopResponse* response) override;

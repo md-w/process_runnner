@@ -95,6 +95,13 @@
         "fstream": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "cinttypes": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "regex": "cpp",
+        "variant": "cpp"
     },
 }

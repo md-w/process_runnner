@@ -10,7 +10,10 @@
 #include "process_runner.h"
 
 std::string ProcessRunner::initial_directory{Poco::Path::current()};
-void ProcessRunner::set_initial_directory(const std::string& initial_directory_) { initial_directory = initial_directory_; }
+void ProcessRunner::set_initial_directory(const std::string& initial_directory_)
+{
+  initial_directory = initial_directory_;
+}
 std::string ProcessRunner::get_initial_directory() { return initial_directory; }
 
 ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args, std::string initial_directory)
@@ -36,17 +39,11 @@ void ProcessRunner::start()
 }
 void ProcessRunner::signal_to_stop()
 {
-  std::unique_lock<std::mutex> lock_thread_running(_thread_running_mutex);
-  if (!_is_thread_running) {
-    _thread_running_cv.wait(lock_thread_running);
-  }
-
+  int id = get_id();
   _do_shutdown = true;
-  if (_process_handle) {
-    if (_process_handle->id() > 0) {
-      RAY_LOG_INF << "signal_to_stop called";
-      Poco::Process::requestTermination(_process_handle->id());
-    }
+  if (id > 0) {
+    RAY_LOG_INF << "signal_to_stop called";
+    Poco::Process::requestTermination(id);
   }
 }
 void ProcessRunner::stop()
@@ -120,21 +117,18 @@ void ProcessRunner::run()
   // RAY_LOG_INF << "Thread Stopped for " << _composite_command;
 }
 
-bool ProcessRunner::is_running()
+bool ProcessRunner::is_running() { return get_id() > 0; }
+
+int ProcessRunner::get_last_exit_code() { return _last_exit_code; }
+
+int ProcessRunner::get_id()
 {
-  // RAY_LOG_INF << "is running started";
   std::unique_lock<std::mutex> lock_thread_running(_thread_running_mutex);
   if (!_is_thread_running) {
     _thread_running_cv.wait(lock_thread_running);
   }
-  // RAY_LOG_INF << "is running returned";
   if (_process_handle) {
-    if (_process_handle->id() > 0) {
-      return true;
-    }
+    return _process_handle->id();
   }
-
-  return false;
+  return -1;
 }
-
-int ProcessRunner::get_last_exit_code() { return _last_exit_code; }

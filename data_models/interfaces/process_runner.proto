@@ -10,7 +10,7 @@ package data_models;
 // The greeting service definition.
 service ProcessRunner {
   // Sends a greeting
-  rpc RunProcess (ProcessRunnerRequest) returns (ProcessRunnerResponse) {}
+  rpc RunProcess (RunProcessRequest) returns (RunProcessResponse) {}
   rpc SignalToStop (SignalToStopRequest) returns (SignalToStopResponse) {}
   rpc IsRunning (IsRunningRequest) returns (IsRunningResponse) {}
   rpc GetLastExitCode (GetLastExitCodeRequest) returns (GetLastExitCodeResponse) {}
@@ -18,45 +18,54 @@ service ProcessRunner {
 }
 
 // The request message containing the command and arguments.
-message ProcessRunnerRequest {
+message RunProcessRequest {
   string command = 1;
   repeated string args = 2;
 }
 
 // The response message containing the greetings
-message ProcessRunnerResponse {
-  int64 exit_code = 1;
-  string message = 2;
+message RunProcessResponse {
+  int64 key = 1;
+  int64 error_code = 2;
+  string message = 3;
+  int64 exit_code = 4;
 }
 
 message SignalToStopRequest {
-
+  int64 key = 1;
 }
 
 message SignalToStopResponse {
-
+  int64 key = 1;
+  int64 error_code = 2;
 }
 
 message IsRunningRequest {
-
+  int64 key = 1;
 }
 
 message IsRunningResponse {
-  bool value = 1;
+  int64 key = 1;
+  int64 error_code = 2;
+  bool value = 3;
 }
 
 message GetLastExitCodeRequest {
-
+  int64 key = 1;
 }
 
 message GetLastExitCodeResponse {
-  int64 value = 1;
+  int64 key = 1;
+  int64 error_code = 2;
+  int64 value = 3;
 }
 
 message GetIdRequest {
-
+  int64 key = 1;
 }
 
 message GetIdResponse {
-  int64 value = 1;
+  int64 key = 1;
+  int64 error_code = 2;
+  int64 value = 3;
 }

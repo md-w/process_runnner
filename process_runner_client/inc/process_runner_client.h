@@ -7,42 +7,25 @@
 #define pipeline_remote_h
 #include <atomic>
 #include <future>
+#include <grpcpp/grpcpp.h>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
 
+#include "protobuf_helper.h"
 
 class ProcessRunnerClient
 {
 private:
-  std::atomic_bool _do_shutdown{false};
-  std::atomic_bool _is_internal_shutdown{false};
-  std::atomic_int _last_exit_code{-1};
-  bool _is_already_shutting_down{false};
-  inline bool _do_shutdown_composite() { return (_do_shutdown || _is_internal_shutdown); }
+  std::string host{"192.168.1.101:50051"};
+  std::size_t _key{0};
+  std::unique_ptr<data_models::ProcessRunner::Stub> _stub;
 
-  // std::unique_ptr<std::thread> _thread;
-  std::unique_ptr<std::future<void>> _thread;
-
-  std::string _command;
-  std::vector<std::string> _args;
-  std::string _initial_directory;
-
-  std::string _composite_command{};
-
-  // std::unique_ptr<Poco::ProcessHandle> _process_handle;
-
-  std::mutex _thread_running_mutex;
-  std::condition_variable _thread_running_cv;
-  bool _is_thread_running{false};
-  void start();
-  void stop();
-  void run();
-
+  // ::grpc::CreateChannel(target_str, ::grpc::InsecureChannelCredentials()));
 public:
-  ProcessRunnerClient(std::string command, std::vector<std::string> args);
+  ProcessRunnerClient(std::string command, std::vector<std::string> args, std::shared_ptr<grpc::Channel> channel);
   ~ProcessRunnerClient();
   void signal_to_stop();
   bool is_running();

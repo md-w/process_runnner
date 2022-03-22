@@ -166,12 +166,14 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
+      std::string host = "192.168.1.101:50051";
+      std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
       std::vector<std::string> args;
       args.emplace_back("-i");
       args.emplace_back("rtmp://192.168.1.1:9001");
       args.emplace_back("-o");
       args.emplace_back("./videos");
-      ProcessRunnerClient process_runner_client("media_converter", args);
+      ProcessRunnerClient process_runner_client("media_converter", args, channel);
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";

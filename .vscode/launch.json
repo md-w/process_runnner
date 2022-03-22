@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "server_entry_point",
+            "name": "entry_point_server",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/server_entry_point/Debug/server_entry_point.exe",
+            "program": "${workspaceFolder}/build/entry_point_server/Debug/entry_point_server.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -17,7 +17,7 @@
             "windows": {
                 "type": "cppvsdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/build/server_entry_point/Debug/server_entry_point.exe",
+                "program": "${workspaceFolder}/build/entry_point_server/Debug/entry_point_server.exe",
                 "args": [],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",
@@ -26,10 +26,10 @@
             }
         },
         {
-            "name": "client_entry_point",
+            "name": "entry_point_client",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/client_entry_point/Debug/client_entry_point.exe",
+            "program": "${workspaceFolder}/build/entry_point_client/Debug/entry_point_client.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -38,7 +38,7 @@
             "windows": {
                 "type": "cppvsdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/build/client_entry_point/Debug/client_entry_point.exe",
+                "program": "${workspaceFolder}/build/entry_point_client/Debug/entry_point_client.exe",
                 "args": [],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",
