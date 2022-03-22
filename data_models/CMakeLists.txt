@@ -39,7 +39,9 @@ target_link_libraries(data_models_protobuf_helper
 protobuf_generate(TARGET data_models_protobuf_helper
   PROTOS ${PROTO_FILES}
   LANGUAGE cpp
+  GENERATE_EXTENSIONS .pb.h .pb.cc
 )
+
 protobuf_generate(TARGET data_models_protobuf_helper
   PROTOS ${PROTO_FILES}
   LANGUAGE grpc

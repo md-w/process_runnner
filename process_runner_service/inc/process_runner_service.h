@@ -6,13 +6,16 @@
 #ifndef process_runner_service_h
 #define process_runner_service_h
 
+#include <map>
+#include <memory>
 #include <grpc/grpc.h>
 
-#include "interfaces/process_runner.grpc.pb.h"
-#include "interfaces/process_runner.pb.h"
+#include "protobuf_helper.h"
 
 class ProcessRunnerService final : public data_models::ProcessRunner::Service
 {
+private:
+  std::map<std::size_t, std::unique_ptr<ProcessRunner>> process_runner_map;
 public:
   ::grpc::Status RunProcess(::grpc::ServerContext* context, const data_models::ProcessRunnerRequest* request,
                           data_models::ProcessRunnerResponse* response) override;
