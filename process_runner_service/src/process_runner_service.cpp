@@ -19,9 +19,8 @@
     RAY_LOG_INF << "Key not found";
     std::cout << "Here";
     try {
-      // std::unique_ptr<ProcessRunner> process_runner =
-      //     std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args);
-      // process_runner_map.push(std::pair(key, process_runner));
+      process_runner_map.emplace(std::pair(
+          key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args)));
 
     } catch (const std::exception& e) {
       std::cerr << e.what() << '\n';
@@ -31,7 +30,6 @@
   } else {
     RAY_LOG_INF << "Key found";
   }
-  return ::grpc::Status::CANCELLED;
   response->set_exit_code(process_runner_map.at(key)->get_last_exit_code());
   response->set_message("Started");
   response->set_key(key);

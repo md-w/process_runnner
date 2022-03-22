@@ -41,8 +41,8 @@ void ProcessRunner::signal_to_stop()
 {
   int id = get_id();
   _do_shutdown = true;
+  RAY_LOG_INF << "signal_to_stop called";
   if (id > 0) {
-    RAY_LOG_INF << "signal_to_stop called";
     Poco::Process::requestTermination(id);
   }
 }
@@ -74,7 +74,7 @@ void ProcessRunner::run()
 
   RAY_LOG_INF << "Thread Started for " << _composite_command << " from: " << _initial_directory;
   while (!_do_shutdown_composite()) {
-    // RAY_LOG_INF << "Starting process " << _composite_command << " from: " << _initial_directory;
+    RAY_LOG_INF << "Starting process " << _composite_command << " from: " << _initial_directory;
     {
       std::lock_guard<std::mutex> lock_thread_running(_thread_running_mutex);
       try {
@@ -93,7 +93,7 @@ void ProcessRunner::run()
       if (_process_handle->id() > 0) {
         _last_exit_code = 0;
         _last_exit_code = _process_handle->wait();
-        // RAY_LOG_INF << "Process returned with:: " << exit_code;
+        RAY_LOG_INF << "Process returned with:: " << _last_exit_code;
         _process_handle = nullptr;
       }
     } else {

@@ -166,14 +166,16 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
-      std::string host = "192.168.1.101:50051";
+      std::string host = "127.0.0.1:50051";
+
+      //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@192.168.0.35/media/video1 -o /workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from: /workspaces/vtpl_agent_2022/build/vtpl_agent/
       std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
       std::vector<std::string> args;
       args.emplace_back("-i");
-      args.emplace_back("rtmp://192.168.1.1:9001");
+      args.emplace_back("rtsp://admin:AdmiN1234@192.168.0.35/media/video1");
       args.emplace_back("-o");
-      args.emplace_back("./videos");
-      ProcessRunnerClient process_runner_client("media_converter", args, channel);
+      args.emplace_back("/workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major");
+      ProcessRunnerClient process_runner_client("./ffrecorder", args, channel);
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";
