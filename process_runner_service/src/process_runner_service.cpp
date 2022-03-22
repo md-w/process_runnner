@@ -16,8 +16,7 @@
   }
   std::size_t key = data_models::hash_value(process_runner_arguments);
   if (process_runner_map.find(key) == process_runner_map.end()) {
-    RAY_LOG_INF << "Key not found";
-    std::cout << "Here";
+    RAY_LOG_INF << "Adding new process runner " << key;
     try {
       process_runner_map.emplace(std::pair(
           key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args)));
@@ -28,7 +27,7 @@
     }
 
   } else {
-    RAY_LOG_INF << "Key found";
+    RAY_LOG_INF << "Key alrady exists";
   }
   response->set_exit_code(process_runner_map.at(key)->get_last_exit_code());
   response->set_message("Started");
@@ -47,6 +46,7 @@
     process_runner_map.at(key)->signal_to_stop();
     process_runner_map.erase(key);
     is_found = true;
+    RAY_LOG_INF << "Removing process runner " << key;
   }
 
   if (is_found) {

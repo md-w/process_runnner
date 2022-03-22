@@ -14,7 +14,7 @@
 #include <thread>
 #include <vector>
 
-#include "data_models.h"
+#include "data_models_process_runner.h"
 #include "protobuf_helper.h"
 
 class ProcessRunnerClient : public data_models::IProcessRunner
@@ -26,14 +26,17 @@ private:
 
   std::size_t _key{0};
   std::atomic_bool _do_shutdown{false};
-  std::atomic_bool _is_internal_shutdown{false};
+  bool _is_already_shutting_down{false};
   std::unique_ptr<data_models::ProcessRunner::Stub> _stub;
   std::unique_ptr<std::thread> _thread;
   void run_process();
   void run();
+  void stop();
+
 public:
   ProcessRunnerClient(std::string command, std::vector<std::string> args, std::shared_ptr<grpc::Channel> channel);
   ~ProcessRunnerClient();
+
   void signal_to_stop();
   bool is_running();
   int get_last_exit_code();

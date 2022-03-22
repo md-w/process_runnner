@@ -12,7 +12,7 @@
 #include <mutex>
 #include <thread>
 
-#include "data_models.h"
+#include "data_models_process_runner.h"
 class ProcessRunner : public data_models::IProcessRunner
 {
 private:

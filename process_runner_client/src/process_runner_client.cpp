@@ -26,10 +26,24 @@ ProcessRunnerClient::ProcessRunnerClient(std::string command, std::vector<std::s
   _thread = std::make_unique<std::thread>(&ProcessRunnerClient::run, this);
 }
 
-ProcessRunnerClient::~ProcessRunnerClient() { signal_to_stop(); }
+ProcessRunnerClient::~ProcessRunnerClient() { stop(); }
+
+void ProcessRunnerClient::stop()
+{
+  signal_to_stop();
+  if (_thread) {
+    if (_thread->joinable()) {
+      _thread->join();
+    }
+  }
+}
 
 void ProcessRunnerClient::signal_to_stop()
 {
+  if (_is_already_shutting_down)
+    return;
+  _is_already_shutting_down = true;
+  _do_shutdown = true;
   if (_stub) {
     ::grpc::ClientContext context;
     data_models::SignalToStopRequest request;
@@ -78,9 +92,11 @@ void ProcessRunnerClient::run_process()
       _key = response.key();
       RAY_LOG_INF << "Started with key: " << _key;
     } else {
-      std::string err = "Error: " + status.error_code();
-      RAY_LOG_ERR << err;
-      throw std::runtime_error(err);
+      std::stringstream err;
+      err << "Error: ";
+      err << status.error_code();
+      RAY_LOG_ERR << err.str();
+      throw std::runtime_error(err.str());
     }
   }
 }
@@ -97,9 +113,11 @@ bool ProcessRunnerClient::is_running()
     if (status.ok()) {
       is_running = response.value();
     } else {
-      std::string err = "Error: " + status.error_code();
-      RAY_LOG_ERR << err;
-      throw std::runtime_error(err);
+      std::stringstream err;
+      err << "Error: ";
+      err << status.error_code();
+      RAY_LOG_ERR << err.str();
+      throw std::runtime_error(err.str());
     }
   }
   return is_running;
@@ -117,9 +135,11 @@ int ProcessRunnerClient::get_last_exit_code()
     if (status.ok()) {
       exit_code = response.value();
     } else {
-      std::string err = "Error: " + status.error_code();
-      RAY_LOG_ERR << err;
-      throw std::runtime_error(err);
+      std::stringstream err;
+      err << "Error: ";
+      err << status.error_code();
+      RAY_LOG_ERR << err.str();
+      throw std::runtime_error(err.str());
     }
   }
   return exit_code;
@@ -136,9 +156,11 @@ int ProcessRunnerClient::get_id()
     if (status.ok()) {
       id = response.value();
     } else {
-      std::string err = "Error: " + status.error_code();
-      RAY_LOG_ERR << err;
-      throw std::runtime_error(err);
+      std::stringstream err;
+      err << "Error: ";
+      err << status.error_code();
+      RAY_LOG_ERR << err.str();
+      throw std::runtime_error(err.str());
     }
   }
   return id;
@@ -156,9 +178,11 @@ std::string ProcessRunnerClient::get_composite_command()
     if (status.ok()) {
       _key = response.key();
     } else {
-      std::string err = "Error: " + status.error_code();
-      RAY_LOG_ERR << err;
-      throw std::runtime_error(err);
+      std::stringstream err;
+      err << "Error: ";
+      err << status.error_code();
+      RAY_LOG_ERR << err.str();
+      throw std::runtime_error(err.str());
     }
   }
 
@@ -176,9 +200,11 @@ std::string ProcessRunnerClient::get_initial_directory()
     if (status.ok()) {
       initial_directory = response.value();
     } else {
-      std::string err = "Error: " + status.error_code();
-      RAY_LOG_ERR << err;
-      throw std::runtime_error(err);
+      std::stringstream err;
+      err << "Error: ";
+      err << status.error_code();
+      RAY_LOG_ERR << err.str();
+      throw std::runtime_error(err.str());
     }
   }
   return initial_directory;

@@ -56,11 +56,11 @@ set_target_properties(
 )
 
 add_library(data_models
-  src/data_models.cpp
+  src/data_models_process_runner.cpp
 )
 
 target_precompile_headers(data_models
-  PUBLIC inc/data_models.h
+  PUBLIC inc/data_models_process_runner.h
 )
 
 target_include_directories(data_models
