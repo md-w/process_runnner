@@ -6,10 +6,12 @@ find_package(Poco REQUIRED Foundation Util)
 
 add_library(process_runner_client STATIC
     src/process_runner_client.cpp
+    src/process_runner_service_caller.cpp
 )
 
 target_precompile_headers(process_runner_client
     PUBLIC inc/process_runner_client.h
+    PUBLIC inc/process_runner_service_caller.h
 )
 
 target_include_directories(process_runner_client

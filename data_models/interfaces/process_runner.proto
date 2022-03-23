@@ -17,6 +17,9 @@ service ProcessRunner {
   rpc GetId (GetIdRequest) returns (GetIdResponse) {}
   rpc GetCompositeCommand (GetCompositeCommandRequest) returns (GetCompositeCommandResponse) {}
   rpc GetInitialDirectory (GetInitialDirectoryRequest) returns (GetInitialDirectoryResponse) {}
+  rpc GetApplicationInstallationDirectory (GetApplicationInstallationDirectoryRequest) returns (GetApplicationInstallationDirectoryResponse) {}
+  rpc GetConfigDirectory (GetConfigDirectoryRequest) returns (GetConfigDirectoryResponse) {}
+  rpc GetDataDirectory (GetDataDirectoryRequest) returns (GetDataDirectoryResponse) {}
 }
 
 // The request message containing the command and arguments.
@@ -88,6 +91,36 @@ message GetInitialDirectoryRequest {
 
 message GetInitialDirectoryResponse {
   int64 key = 1;
+  int64 error_code = 2;
+  string value = 3;
+}
+
+message GetApplicationInstallationDirectoryRequest {
+
+}
+
+message GetApplicationInstallationDirectoryResponse {
+
+  int64 error_code = 2;
+  string value = 3;
+}
+
+message GetConfigDirectoryRequest {
+
+}
+
+message GetConfigDirectoryResponse {
+
+  int64 error_code = 2;
+  string value = 3;
+}
+
+message GetDataDirectoryRequest {
+
+}
+
+message GetDataDirectoryResponse {
+
   int64 error_code = 2;
   string value = 3;
 }

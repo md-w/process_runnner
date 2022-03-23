@@ -5,6 +5,17 @@
 #include "process_runner_service.h"
 #include "logging.h"
 
+ProcessRunnerService::ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
+                                           std::string data_directory)
+    : _application_installation_directory(std::move(application_installation_directory)),
+      _config_directory(std::move(config_directory)), _data_directory(std::move(data_directory))
+{
+  ProcessRunner::set_application_installation_directory(_application_installation_directory);
+  ProcessRunner::set_config_directory(_config_directory);
+  ProcessRunner::set_data_directory(_data_directory);
+  ProcessRunner::set_initial_directory(_application_installation_directory);
+}
+
 ::grpc::Status ProcessRunnerService::RunProcess(::grpc::ServerContext* context,
                                                 const data_models::RunProcessRequest* request,
                                                 data_models::RunProcessResponse* response)
@@ -154,5 +165,32 @@
   }
   response->set_key(key);
 
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status ProcessRunnerService::GetApplicationInstallationDirectory(
+    ::grpc::ServerContext* context, const data_models::GetApplicationInstallationDirectoryRequest* request,
+    data_models::GetApplicationInstallationDirectoryResponse* response)
+{
+  response->set_error_code(0);
+  response->set_value(_application_installation_directory);
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status ProcessRunnerService::GetConfigDirectory(::grpc::ServerContext* context,
+                                                        const data_models::GetConfigDirectoryRequest* request,
+                                                        data_models::GetConfigDirectoryResponse* response)
+{
+  response->set_error_code(0);
+  response->set_value(_config_directory);
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status ProcessRunnerService::GetDataDirectory(::grpc::ServerContext* context,
+                                                      const data_models::GetDataDirectoryRequest* request,
+                                                      data_models::GetDataDirectoryResponse* response)
+{
+  response->set_error_code(0);
+  response->set_value(_data_directory);
   return ::grpc::Status::OK;
 }

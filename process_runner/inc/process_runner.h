@@ -17,6 +17,9 @@ class ProcessRunner : public data_models::IProcessRunner
 {
 private:
   static std::string initial_directory;
+  static std::string application_installation_directory;
+  static std::string config_directory;
+  static std::string data_directory;
   std::atomic_bool _do_shutdown{false};
   std::atomic_bool _is_internal_shutdown{false};
   std::atomic_int _last_exit_code{-1};
@@ -38,9 +41,13 @@ private:
   void start();
   void stop();
   void run();
+  static std::string get_current_directory();
 
 public:
   static void set_initial_directory(const std::string& initial_directory_);
+  static void set_application_installation_directory(const std::string& application_installation_directory_);
+  static void set_config_directory(const std::string& config_directory_);
+  static void set_data_directory(const std::string& data_directory_);
 
   ProcessRunner(std::string command, std::vector<std::string> args,
                 std::string initial_directory = ProcessRunner::initial_directory);
@@ -51,5 +58,8 @@ public:
   int get_id();
   std::string get_composite_command();
   std::string get_initial_directory();
+  std::string get_application_installation_directory();
+  std::string get_config_directory();
+  std::string get_data_directory();
 };
 #endif // process_runner_h

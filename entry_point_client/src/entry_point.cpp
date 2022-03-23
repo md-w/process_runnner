@@ -168,14 +168,22 @@ public:
     {
       std::string host = "127.0.0.1:50051";
 
-      //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@192.168.0.35/media/video1 -o /workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from: /workspaces/vtpl_agent_2022/build/vtpl_agent/
+      //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@192.168.0.35/media/video1 -o
+      ///workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from:
+      ///workspaces/vtpl_agent_2022/build/vtpl_agent/
       std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+      std::shared_ptr<ProcessRunnerServiceCaller> process_runner_service_caller =
+          std::make_shared<ProcessRunnerServiceCaller>(channel);
+      std::string application_path = vtpl::utilities::merge_directories(
+          process_runner_service_caller->get_application_installation_directory(), "ffrecorder");
+      std::string recording_dir = vtpl::utilities::merge_directories(
+          process_runner_service_caller->get_data_directory(), "4dc75/98c9a/recording_clip/major");
       std::vector<std::string> args;
       args.emplace_back("-i");
       args.emplace_back("rtsp://admin:AdmiN1234@192.168.0.35/media/video1");
       args.emplace_back("-o");
-      args.emplace_back("/workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major");
-      ProcessRunnerClient process_runner_client("./ffrecorder", args, channel);
+      args.emplace_back(recording_dir);
+      ProcessRunnerClient process_runner_client(application_path, args, process_runner_service_caller);
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";

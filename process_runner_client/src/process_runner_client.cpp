@@ -8,8 +8,8 @@
 #include "process_runner_client.h"
 
 ProcessRunnerClient::ProcessRunnerClient(std::string command, std::vector<std::string> args,
-                                         std::shared_ptr<grpc::Channel> channel)
-    : _command(std::move(command)), _args(std::move(args))
+                                         std::shared_ptr<ProcessRunnerServiceCaller> service_caller)
+    : _command(std::move(command)), _args(std::move(args)), _service_caller(service_caller)
 {
   std::stringstream ss;
   ss << "[";
@@ -22,7 +22,6 @@ ProcessRunnerClient::ProcessRunnerClient(std::string command, std::vector<std::s
 
   _composite_command = ss.str();
 
-  _stub = data_models::ProcessRunner::NewStub(channel);
   _thread = std::make_unique<std::thread>(&ProcessRunnerClient::run, this);
 }
 
@@ -44,19 +43,7 @@ void ProcessRunnerClient::signal_to_stop()
     return;
   _is_already_shutting_down = true;
   _do_shutdown = true;
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::SignalToStopRequest request;
-    request.set_key(_key);
-    data_models::SignalToStopResponse response;
-    grpc::Status status = _stub->SignalToStop(&context, request, &response);
-    if (status.ok()) {
-      _key = response.key();
-      RAY_LOG_INF << "Stopped with key: " << _key;
-    } else {
-      RAY_LOG_ERR << "Error: " << status.error_code();
-    }
-  }
+  _service_caller->signal_to_stop(_key);
 }
 
 void ProcessRunnerClient::run()
@@ -79,133 +66,26 @@ void ProcessRunnerClient::run()
   }
 }
 
-void ProcessRunnerClient::run_process()
-{
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::RunProcessRequest request;
-    request.set_command(_command);
-    *request.mutable_args() = {_args.begin(), _args.end()};
-    data_models::RunProcessResponse response;
-    grpc::Status status = _stub->RunProcess(&context, request, &response);
-    if (status.ok()) {
-      _key = response.key();
-      RAY_LOG_INF << "Started with key: " << _key;
-    } else {
-      std::stringstream err;
-      err << "Error: ";
-      err << status.error_code();
-      RAY_LOG_ERR << err.str();
-      throw std::runtime_error(err.str());
-    }
-  }
-}
+void ProcessRunnerClient::run_process() { _key = _service_caller->run_process(_command, _args); }
 
 bool ProcessRunnerClient::is_running()
 {
-  bool is_running = false;
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::IsRunningRequest request;
-    request.set_key(_key);
-    data_models::IsRunningResponse response;
-    grpc::Status status = _stub->IsRunning(&context, request, &response);
-    if (status.ok()) {
-      is_running = response.value();
-    } else {
-      std::stringstream err;
-      err << "Error: ";
-      err << status.error_code();
-      RAY_LOG_ERR << err.str();
-      throw std::runtime_error(err.str());
-    }
-  }
-  return is_running;
+  return _service_caller->is_running(_key);
 }
 
 int ProcessRunnerClient::get_last_exit_code()
 {
-  int exit_code = -1;
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::GetLastExitCodeRequest request;
-    request.set_key(_key);
-    data_models::GetLastExitCodeResponse response;
-    grpc::Status status = _stub->GetLastExitCode(&context, request, &response);
-    if (status.ok()) {
-      exit_code = response.value();
-    } else {
-      std::stringstream err;
-      err << "Error: ";
-      err << status.error_code();
-      RAY_LOG_ERR << err.str();
-      throw std::runtime_error(err.str());
-    }
-  }
-  return exit_code;
+  return _service_caller->get_last_exit_code(_key);
 }
 int ProcessRunnerClient::get_id()
 {
-  int id = 0;
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::GetIdRequest request;
-    request.set_key(_key);
-    data_models::GetIdResponse response;
-    grpc::Status status = _stub->GetId(&context, request, &response);
-    if (status.ok()) {
-      id = response.value();
-    } else {
-      std::stringstream err;
-      err << "Error: ";
-      err << status.error_code();
-      RAY_LOG_ERR << err.str();
-      throw std::runtime_error(err.str());
-    }
-  }
-  return id;
+  return _service_caller->get_id(_key);
 }
 std::string ProcessRunnerClient::get_composite_command()
 {
-  std::string composite_command;
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::RunProcessRequest request;
-    request.set_command(_command);
-    *request.mutable_args() = {_args.begin(), _args.end()};
-    data_models::RunProcessResponse response;
-    grpc::Status status = _stub->RunProcess(&context, request, &response);
-    if (status.ok()) {
-      _key = response.key();
-    } else {
-      std::stringstream err;
-      err << "Error: ";
-      err << status.error_code();
-      RAY_LOG_ERR << err.str();
-      throw std::runtime_error(err.str());
-    }
-  }
-
-  return composite_command;
+  return _service_caller->get_composite_command(_key);
 }
 std::string ProcessRunnerClient::get_initial_directory()
 {
-  std::string initial_directory;
-  if (_stub) {
-    ::grpc::ClientContext context;
-    data_models::GetInitialDirectoryRequest request;
-    request.set_key(_key);
-    data_models::GetInitialDirectoryResponse response;
-    grpc::Status status = _stub->GetInitialDirectory(&context, request, &response);
-    if (status.ok()) {
-      initial_directory = response.value();
-    } else {
-      std::stringstream err;
-      err << "Error: ";
-      err << status.error_code();
-      RAY_LOG_ERR << err.str();
-      throw std::runtime_error(err.str());
-    }
-  }
-  return initial_directory;
+  return _service_caller->get_initial_directory(_key);
 }

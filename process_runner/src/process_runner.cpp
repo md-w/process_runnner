@@ -9,12 +9,33 @@
 #include "logging.h"
 #include "process_runner.h"
 
-std::string ProcessRunner::initial_directory{Poco::Path::current()};
+std::string ProcessRunner::get_current_directory()
+{
+  try {
+    return Poco::Path::current();
+  } catch (const std::exception& e) {
+  }
+  return "./";
+}
+
+std::string ProcessRunner::initial_directory{get_current_directory()};
+std::string ProcessRunner::application_installation_directory{ProcessRunner::initial_directory};
+std::string ProcessRunner::config_directory{ProcessRunner::initial_directory};
+std::string ProcessRunner::data_directory{ProcessRunner::initial_directory};
+
 void ProcessRunner::set_initial_directory(const std::string& initial_directory_)
 {
   initial_directory = initial_directory_;
 }
-std::string ProcessRunner::get_initial_directory() { return _initial_directory; }
+
+void ProcessRunner::set_application_installation_directory(const std::string& application_installation_directory_)
+{
+  application_installation_directory = application_installation_directory_;
+}
+
+void ProcessRunner::set_config_directory(const std::string& config_directory_) { config_directory = config_directory_; }
+
+void ProcessRunner::set_data_directory(const std::string& data_directory_) { data_directory = data_directory_; }
 
 ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args, std::string initial_directory)
     : _command(std::move(command)), _args(std::move(args)), _initial_directory(std::move(initial_directory))
@@ -132,4 +153,9 @@ int ProcessRunner::get_id()
   }
   return -1;
 }
+
 std::string ProcessRunner::get_composite_command() { return _composite_command; }
+std::string ProcessRunner::get_initial_directory() { return _initial_directory; }
+std::string ProcessRunner::get_application_installation_directory() { return application_installation_directory; }
+std::string ProcessRunner::get_config_directory() { return config_directory; }
+std::string ProcessRunner::get_data_directory() { return data_directory; }

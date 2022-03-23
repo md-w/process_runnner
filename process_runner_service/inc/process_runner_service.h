@@ -16,8 +16,27 @@ class ProcessRunnerService final : public data_models::ProcessRunner::Service
 {
 private:
   std::map<std::size_t, std::unique_ptr<ProcessRunner>> process_runner_map;
+  std::string _application_installation_directory;
+  std::string _config_directory;
+  std::string _data_directory;
 
 public:
+  ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
+                       std::string data_directory);
+
+  ::grpc::Status
+  GetApplicationInstallationDirectory(::grpc::ServerContext* context,
+                                      const data_models::GetApplicationInstallationDirectoryRequest* request,
+                                      data_models::GetApplicationInstallationDirectoryResponse* response) override;
+
+  ::grpc::Status GetConfigDirectory(::grpc::ServerContext* context,
+                                    const data_models::GetConfigDirectoryRequest* request,
+                                    data_models::GetConfigDirectoryResponse* response) override;
+
+  ::grpc::Status GetDataDirectory(::grpc::ServerContext* context,
+                                    const data_models::GetDataDirectoryRequest* request,
+                                    data_models::GetDataDirectoryResponse* response) override;
+
   ::grpc::Status RunProcess(::grpc::ServerContext* context, const data_models::RunProcessRequest* request,
                             data_models::RunProcessResponse* response) override;
 

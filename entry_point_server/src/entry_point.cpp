@@ -166,7 +166,8 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
-      std::unique_ptr<ProcessRunnerServiceRun> process_runner = std::make_unique<ProcessRunnerServiceRun>();
+      std::unique_ptr<ProcessRunnerServiceRun> process_runner = std::make_unique<ProcessRunnerServiceRun>(
+          get_application_installation_folder(), _base_config_directory_path, _base_data_directory_path);
       waitForTerminationRequest();
       process_runner->signal_to_stop();
     }
