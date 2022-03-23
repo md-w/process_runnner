@@ -3,8 +3,8 @@
 // *****************************************************
 
 #pragma once
-#ifndef data_models_h
-#define data_models_h
+#ifndef data_models_process_runner_h
+#define data_models_process_runner_h
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -36,4 +36,4 @@ template <> struct std::hash<data_models::ProcessRunnerArguments> {
     return data_models::hash_value(s);
   }
 };
-#endif // data_models_h
+#endif // data_models_process_runner_h
