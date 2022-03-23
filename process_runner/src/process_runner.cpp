@@ -17,10 +17,13 @@ std::string ProcessRunner::get_current_directory()
   }
   return "./";
 }
-
+// NOLINTNEXTLINE(cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 std::string ProcessRunner::initial_directory{get_current_directory()};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 std::string ProcessRunner::application_installation_directory{ProcessRunner::initial_directory};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 std::string ProcessRunner::config_directory{ProcessRunner::initial_directory};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 std::string ProcessRunner::data_directory{ProcessRunner::initial_directory};
 
 void ProcessRunner::set_initial_directory(const std::string& initial_directory_)
@@ -58,22 +61,24 @@ void ProcessRunner::start()
   //_thread = std::make_unique<std::thread>(&ProcessRunner::run, this);
   _thread = std::make_unique<std::future<void>>(std::async(std::launch::async, &ProcessRunner::run, this));
 }
-void ProcessRunner::signal_to_stop()
+void ProcessRunner::_signal_to_stop()
 {
-  int id = get_id();
+  int id = _get_id();
   _do_shutdown = true;
   RAY_LOG_INF << "signal_to_stop called";
   if (id > 0) {
     Poco::Process::requestTermination(id);
   }
 }
+
+void ProcessRunner::signal_to_stop() { _signal_to_stop(); }
 void ProcessRunner::stop()
 {
   if (_is_already_shutting_down) {
     return;
   }
   _is_already_shutting_down = true;
-  signal_to_stop();
+  _signal_to_stop();
 
   // if (_thread) {
   //   if (_thread->joinable()) {
@@ -142,7 +147,8 @@ bool ProcessRunner::is_running() { return get_id() > 0; }
 
 int ProcessRunner::get_last_exit_code() { return _last_exit_code; }
 
-int ProcessRunner::get_id()
+int ProcessRunner::get_id() { return _get_id(); }
+int ProcessRunner::_get_id()
 {
   std::unique_lock<std::mutex> lock_thread_running(_thread_running_mutex);
   if (!_is_thread_running) {

@@ -16,7 +16,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   ProcessRunner::set_initial_directory(_application_installation_directory);
 }
 
-::grpc::Status ProcessRunnerService::RunProcess(::grpc::ServerContext* context,
+::grpc::Status ProcessRunnerService::RunProcess(::grpc::ServerContext* /*context*/,
                                                 const data_models::RunProcessRequest* request,
                                                 data_models::RunProcessResponse* response)
 {
@@ -47,7 +47,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::SignalToStop(::grpc::ServerContext* context,
+::grpc::Status ProcessRunnerService::SignalToStop(::grpc::ServerContext* /*context*/,
                                                   const data_models::SignalToStopRequest* request,
                                                   data_models::SignalToStopResponse* response)
 {
@@ -70,7 +70,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::IsRunning(::grpc::ServerContext* context,
+::grpc::Status ProcessRunnerService::IsRunning(::grpc::ServerContext* /*context*/,
                                                const data_models::IsRunningRequest* request,
                                                data_models::IsRunningResponse* response)
 {
@@ -89,7 +89,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetLastExitCode(::grpc::ServerContext* context,
+::grpc::Status ProcessRunnerService::GetLastExitCode(::grpc::ServerContext* /*context*/,
                                                      const data_models::GetLastExitCodeRequest* request,
                                                      data_models::GetLastExitCodeResponse* response)
 {
@@ -109,7 +109,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetId(::grpc::ServerContext* context, const data_models::GetIdRequest* request,
+::grpc::Status ProcessRunnerService::GetId(::grpc::ServerContext* /*context*/, const data_models::GetIdRequest* request,
                                            data_models::GetIdResponse* response)
 {
   bool is_found = false;
@@ -128,7 +128,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetCompositeCommand(::grpc::ServerContext* context,
+::grpc::Status ProcessRunnerService::GetCompositeCommand(::grpc::ServerContext* /*context*/,
                                                          const data_models::GetCompositeCommandRequest* request,
                                                          data_models::GetCompositeCommandResponse* response)
 {
@@ -148,7 +148,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetInitialDirectory(::grpc::ServerContext* context,
+::grpc::Status ProcessRunnerService::GetInitialDirectory(::grpc::ServerContext* /*context*/,
                                                          const data_models::GetInitialDirectoryRequest* request,
                                                          data_models::GetInitialDirectoryResponse* response)
 {
@@ -169,7 +169,7 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
 }
 
 ::grpc::Status ProcessRunnerService::GetApplicationInstallationDirectory(
-    ::grpc::ServerContext* context, const data_models::GetApplicationInstallationDirectoryRequest* request,
+    ::grpc::ServerContext* /*context*/, const data_models::GetApplicationInstallationDirectoryRequest* /*request*/,
     data_models::GetApplicationInstallationDirectoryResponse* response)
 {
   response->set_error_code(0);
@@ -177,8 +177,8 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetConfigDirectory(::grpc::ServerContext* context,
-                                                        const data_models::GetConfigDirectoryRequest* request,
+::grpc::Status ProcessRunnerService::GetConfigDirectory(::grpc::ServerContext* /*context*/,
+                                                        const data_models::GetConfigDirectoryRequest* /*request*/,
                                                         data_models::GetConfigDirectoryResponse* response)
 {
   response->set_error_code(0);
@@ -186,8 +186,8 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetDataDirectory(::grpc::ServerContext* context,
-                                                      const data_models::GetDataDirectoryRequest* request,
+::grpc::Status ProcessRunnerService::GetDataDirectory(::grpc::ServerContext* /*context*/,
+                                                      const data_models::GetDataDirectoryRequest* /*request*/,
                                                       data_models::GetDataDirectoryResponse* response)
 {
   response->set_error_code(0);

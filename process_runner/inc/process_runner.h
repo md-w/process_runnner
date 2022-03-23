@@ -42,12 +42,18 @@ private:
   void stop();
   void run();
   static std::string get_current_directory();
+  void _signal_to_stop();
+  int _get_id();
 
 public:
   static void set_initial_directory(const std::string& initial_directory_);
   static void set_application_installation_directory(const std::string& application_installation_directory_);
   static void set_config_directory(const std::string& config_directory_);
   static void set_data_directory(const std::string& data_directory_);
+
+  static std::string get_application_installation_directory();
+  static std::string get_config_directory();
+  static std::string get_data_directory();
 
   ProcessRunner(std::string command, std::vector<std::string> args,
                 std::string initial_directory = ProcessRunner::initial_directory);
@@ -58,8 +64,5 @@ public:
   int get_id();
   std::string get_composite_command();
   std::string get_initial_directory();
-  std::string get_application_installation_directory();
-  std::string get_config_directory();
-  std::string get_data_directory();
 };
 #endif // process_runner_h

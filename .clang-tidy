@@ -258,7 +258,7 @@ CheckOptions:
   - key:             modernize-loop-convert.MinConfidence
     value:           reasonable
   - key:             performance-unnecessary-value-param.AllowedTypes
-    value:           ''
+    value:           'shared_ptr'
   - key:             readability-uniqueptr-delete-release.PreferResetCall
     value:           'false'
   - key:             misc-throw-by-value-catch-by-reference.MaxSize

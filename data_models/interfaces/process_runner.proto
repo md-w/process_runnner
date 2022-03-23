@@ -30,67 +30,67 @@ message RunProcessRequest {
 
 // The response message containing the greetings
 message RunProcessResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
   string message = 3;
   int64 exit_code = 4;
 }
 
 message SignalToStopRequest {
-  int64 key = 1;
+  uint64 key = 1;
 }
 
 message SignalToStopResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
 }
 
 message IsRunningRequest {
-  int64 key = 1;
+  uint64 key = 1;
 }
 
 message IsRunningResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
   bool value = 3;
 }
 
 message GetLastExitCodeRequest {
-  int64 key = 1;
+  uint64 key = 1;
 }
 
 message GetLastExitCodeResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
-  int64 value = 3;
+  int32 value = 3;
 }
 
 message GetIdRequest {
-  int64 key = 1;
+  uint64 key = 1;
 }
 
 message GetIdResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
-  int64 value = 3;
+  int32 value = 3;
 }
 
 message GetCompositeCommandRequest {
-  int64 key = 1;
+  uint64 key = 1;
 }
 
 message GetCompositeCommandResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
   string value = 3;
 }
 
 message GetInitialDirectoryRequest {
-  int64 key = 1;
+  uint64 key = 1;
 }
 
 message GetInitialDirectoryResponse {
-  int64 key = 1;
+  uint64 key = 1;
   int64 error_code = 2;
   string value = 3;
 }

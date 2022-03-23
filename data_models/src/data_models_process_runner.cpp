@@ -12,6 +12,7 @@ std::size_t hash_value(ProcessRunnerArguments const& s)
   std::ostringstream os;
   std::copy(s.args.begin(), s.args.end(), std::ostream_iterator<std::string>(os));
   std::size_t h2 = std::hash<std::string>{}(os.str());
+  // NOLINTNEXTLINE(hicpp-signed-bitwise)
   return h1 ^ (h2 << 1); // or use boost::hash_combine
 }
 

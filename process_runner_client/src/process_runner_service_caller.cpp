@@ -149,13 +149,12 @@ std::string ProcessRunnerServiceCaller::get_application_installation_directory()
   grpc::Status status = _stub->GetApplicationInstallationDirectory(&context, request, &response);
   if (status.ok()) {
     return response.value();
-  } else {
-    std::stringstream err;
-    err << "Error: ";
-    err << status.error_code();
-    RAY_LOG_ERR << err.str();
-    throw std::runtime_error(err.str());
   }
+  std::stringstream err;
+  err << "Error: ";
+  err << status.error_code();
+  RAY_LOG_ERR << err.str();
+  throw std::runtime_error(err.str());
 }
 std::string ProcessRunnerServiceCaller::get_config_directory()
 {
@@ -165,13 +164,12 @@ std::string ProcessRunnerServiceCaller::get_config_directory()
   grpc::Status status = _stub->GetConfigDirectory(&context, request, &response);
   if (status.ok()) {
     return response.value();
-  } else {
-    std::stringstream err;
-    err << "Error: ";
-    err << status.error_code();
-    RAY_LOG_ERR << err.str();
-    throw std::runtime_error(err.str());
   }
+  std::stringstream err;
+  err << "Error: ";
+  err << status.error_code();
+  RAY_LOG_ERR << err.str();
+  throw std::runtime_error(err.str());
 }
 std::string ProcessRunnerServiceCaller::get_data_directory()
 {
@@ -181,11 +179,10 @@ std::string ProcessRunnerServiceCaller::get_data_directory()
   grpc::Status status = _stub->GetDataDirectory(&context, request, &response);
   if (status.ok()) {
     return response.value();
-  } else {
-    std::stringstream err;
-    err << "Error: ";
-    err << status.error_code();
-    RAY_LOG_ERR << err.str();
-    throw std::runtime_error(err.str());
   }
+  std::stringstream err;
+  err << "Error: ";
+  err << status.error_code();
+  RAY_LOG_ERR << err.str();
+  throw std::runtime_error(err.str());
 }
