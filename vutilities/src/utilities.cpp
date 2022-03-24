@@ -188,3 +188,26 @@ std::string vtpl::utilities::generate_unique_id()
   }
   return id;
 }
+
+std::string vtpl::utilities::compose_url(const std::string& url, const std::string& user, const std::string& pass)
+{
+  if (absl::StrContains(url, ':') && absl::StrContains(url, '@')) {
+    return url;
+  }
+  const std::string search_string("://");
+  std::string url_1;
+  std::string url_2;
+
+  size_t pos = url.find(search_string);
+  if (pos != std::string::npos) {
+    size_t t = static_cast<std::string::difference_type>(pos) +
+               static_cast<std::string::difference_type>(search_string.length());
+    url_1 = url.substr(0, t);
+    url_2 = url.substr(t, static_cast<std::string::difference_type>(url.length()) -
+                              static_cast<std::string::difference_type>(url_1.length()));
+
+    return url_1.append(user).append(":").append(pass).append("@").append(url_2);
+  }
+
+  return url;
+}

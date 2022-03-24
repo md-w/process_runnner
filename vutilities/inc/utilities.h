@@ -29,6 +29,7 @@ bool delete_directory(const std::string& dir_path);
 bool delete_file(const std::string& file_path);
 std::string base64_encode_file(const std::string& file_path);
 std::string generate_unique_id();
+std::string compose_url(const std::string& url, const std::string& user, const std::string& pass);
 } // namespace utilities
 
 } // namespace vtpl

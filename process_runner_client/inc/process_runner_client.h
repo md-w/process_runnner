@@ -15,8 +15,8 @@
 #include <vector>
 
 #include "data_models_process_runner.h"
-#include "protobuf_helper.h"
 #include "process_runner_service_caller.h"
+#include "protobuf_helper.h"
 
 class ProcessRunnerClient : public data_models::IProcessRunner
 {
@@ -35,8 +35,9 @@ private:
   void stop();
 
 public:
-  ProcessRunnerClient(std::string command, std::vector<std::string> args, std::shared_ptr<ProcessRunnerServiceCaller> service_caller);
-  ~ProcessRunnerClient();
+  ProcessRunnerClient(std::string command, std::vector<std::string> args,
+                      std::shared_ptr<ProcessRunnerServiceCaller> service_caller);
+  virtual ~ProcessRunnerClient();
 
   void signal_to_stop();
   bool is_running();
