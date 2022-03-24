@@ -9,6 +9,7 @@
 #include "Version.h"
 #include "globalerrorhandler.h"
 #include "logging.h"
+#include "process_runner.h"
 #include "process_runner_client.h"
 #include "utilities.h"
 #include "version_info.h"
@@ -165,12 +166,12 @@ public:
   {
     RAY_LOG_INF << "Started";
     load_first_configuration();
-    {
+    if (true) {
       std::string host = "127.0.0.1:50051";
 
       //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@192.168.0.35/media/video1 -o
-      ///workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from:
-      ///workspaces/vtpl_agent_2022/build/vtpl_agent/
+      /// workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from:
+      /// workspaces/vtpl_agent_2022/build/vtpl_agent/
       std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
       std::shared_ptr<ProcessRunnerServiceCaller> process_runner_service_caller =
           std::make_shared<ProcessRunnerServiceCaller>(channel);
@@ -184,6 +185,21 @@ public:
       args.emplace_back("-o");
       args.emplace_back(recording_dir);
       ProcessRunnerClient process_runner_client(application_path, args, process_runner_service_caller);
+      waitForTerminationRequest();
+    }
+    if (false) {
+      std::unique_ptr<data_models::IProcessRunner> _client_live_process_runner;
+      std::vector<std::string> client_live_process_runner_args;
+      client_live_process_runner_args.emplace_back("-i");
+      std::string composed_url = vtpl::utilities::compose_url("rtsp://192.168.0.35/media/video1", "admin", "AdmiN1234");
+      client_live_process_runner_args.emplace_back(composed_url);
+      client_live_process_runner_args.emplace_back("-o");
+      int rtmp_port = 9001;
+      std::string rtmp_host = "192.168.1.115";
+      client_live_process_runner_args.emplace_back(fmt::format("rtmp://{}:{}", rtmp_host, rtmp_port));
+      _client_live_process_runner = std::make_unique<ProcessRunner>(
+          vtpl::utilities::merge_directories(get_application_installation_folder(), "media_converter.exe"),
+          client_live_process_runner_args, get_application_installation_folder());
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";

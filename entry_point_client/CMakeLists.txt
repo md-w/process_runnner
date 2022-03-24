@@ -22,6 +22,7 @@ target_link_libraries(entry_point_client
     PRIVATE vutilities
     PRIVATE data_models
     PRIVATE process_runner_client
+    PRIVATE process_runner
 )
 
 set_property(TARGET entry_point_client PROPERTY

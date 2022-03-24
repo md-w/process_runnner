@@ -20,12 +20,14 @@ std::size_t hash_value(ProcessRunnerArguments const& s);
 
 class IProcessRunner
 {
+public:
   virtual void signal_to_stop() = 0;
   virtual bool is_running() = 0;
   virtual int get_last_exit_code() = 0;
   virtual int get_id() = 0;
   virtual std::string get_composite_command() = 0;
   virtual std::string get_initial_directory() = 0;
+  virtual ~IProcessRunner() = default;
 };
 } // namespace data_models
 

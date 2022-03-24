@@ -20,30 +20,27 @@ private:
   static std::string application_installation_directory;
   static std::string config_directory;
   static std::string data_directory;
-  std::atomic_bool _do_shutdown{false};
-  std::atomic_bool _is_internal_shutdown{false};
-  std::atomic_int _last_exit_code{-1};
-  bool _is_already_shutting_down{false};
-  inline bool _do_shutdown_composite() { return (_do_shutdown || _is_internal_shutdown); }
-
-  // std::unique_ptr<std::thread> _thread;
-  std::unique_ptr<std::future<void>> _thread;
 
   std::string _command;
   std::vector<std::string> _args;
   std::string _initial_directory;
+  std::atomic_int _last_exit_code{-1};
+  std::string _composite_command;
 
-  std::string _composite_command{};
+  // std::unique_ptr<std::thread> _thread;
+  std::unique_ptr<std::future<void>> _thread;
+  std::atomic_bool _do_shutdown{false};
+
   std::unique_ptr<Poco::ProcessHandle> _process_handle;
   std::mutex _thread_running_mutex;
   std::condition_variable _thread_running_cv;
   bool _is_thread_running{false};
-  void start();
-  void stop();
-  void run();
-  static std::string get_current_directory();
-  void _signal_to_stop();
+  bool _is_already_shutting_down{false};
+
+  static std::string _get_current_directory();
   int _get_id();
+  void run();
+  void _signal_to_stop();
 
 public:
   static void set_initial_directory(const std::string& initial_directory_);
