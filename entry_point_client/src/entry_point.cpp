@@ -174,7 +174,7 @@ public:
       std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
       std::shared_ptr<ProcessRunnerServiceCaller> process_runner_service_caller =
           std::make_shared<ProcessRunnerServiceCaller>(channel);
-      std::string application_path = vtpl::utilities::merge_directories(
+      std::string command = vtpl::utilities::merge_directories(
           process_runner_service_caller->get_application_installation_directory(), "ffrecorder");
       std::string recording_dir = vtpl::utilities::merge_directories(
           process_runner_service_caller->get_data_directory(), "4dc75/98c9a/recording_clip/major");
@@ -183,7 +183,7 @@ public:
       args.emplace_back("rtsp://admin:AdmiN1234@192.168.0.35/media/video1");
       args.emplace_back("-o");
       args.emplace_back(recording_dir);
-      ProcessRunnerClient process_runner_client(application_path, args, process_runner_service_caller);
+      ProcessRunnerClient process_runner_client(command, args, process_runner_service_caller);
       waitForTerminationRequest();
     }
     RAY_LOG_INF << "Stopped";
