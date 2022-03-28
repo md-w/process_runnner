@@ -17,11 +17,18 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
 RUN groupmod --gid $USER_GID $USERNAME \
-    && usermod --uid $USER_UID --gid $USER_GID $USERNAME \
-    && chown -R $USER_UID:$USER_GID /home/$USERNAME
+    && usermod --uid $USER_UID --gid $USER_GID $USERNAME
 
-EXPOSE 8787
+
+WORKDIR /home/$USERNAME/workfiles
 COPY "./entry_point_server" "./entry_point_server"
 COPY "./media_converter" "./media_converter"
+RUN chmod +x "entry_point_server"
+RUN chmod +x "media_converter"
+RUN chown -R $USER_UID:$USER_GID /home/$USERNAME
+USER $USERNAME
 
-ENTRYPOINT [ "./entry_point_server" ]
+ENV COMMAND_PORT 8787
+EXPOSE ${COMMAND_PORT}
+
+CMD [ "./entry_point_server" ]
