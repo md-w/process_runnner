@@ -43,7 +43,7 @@ std::string get_file_name(const std::string& file_name);
 std::string shorten_string(const std::string& str);
 std::string change_extension(const std::string& str, const std::string& ext);
 std::string compose_url(const std::string& url, const std::string& user, const std::string& pass);
-std::string get_environment_value(const std::string& value);
+std::string get_environment_value(const std::string& value, const std::string& default_value);
 } // namespace utilities
 
 } // namespace vtpl

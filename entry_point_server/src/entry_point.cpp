@@ -32,6 +32,8 @@ private:
   std::string _name_of_app{};
   vtpl::globalerrorhandler _globalerrorhandler;
 
+  std::string _command_port{};
+
 protected:
   std::string get_application_running_folder()
   {
@@ -74,14 +76,27 @@ protected:
     Poco::ErrorHandler::set(&_globalerrorhandler);
     load_first_configuration();
     _name_of_app = config().getString("application.baseName");
+    _command_port = config().getString("command_port", vtpl::utilities::get_environment_value("COMMAND_PORT", "8787"));
     std::string s = vtpl::utilities::end_with_directory_seperator(_base_log_directory_path).str();
     ::ray::RayLog::GetLoggerName();
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
   }
 
-  void defineOptions(Poco::Util::OptionSet& options) override { ServerApplication::defineOptions(options); }
+  void defineOptions(Poco::Util::OptionSet& options) override
+  {
+    ServerApplication::defineOptions(options);
+    options.addOption(Poco::Util::Option("command_port", "p", "command port")
+                          .required(false)
+                          .repeatable(false)
+                          .argument("value")
+                          .binding("command_port"));
+  }
 
-  void handle_option(const std::string& name, const std::string& value) {}
+  void handleOption(const std::string& name, const std::string& value) override
+  {
+    std::cout << "options: name : [" << name << "] value: [" << value << "]" << std::endl;
+    ServerApplication::handleOption(name, value);
+  }
 
   static void display_info()
   {
@@ -136,11 +151,10 @@ public:
     vtpl::utilities::create_directories(_base_log_directory_path);
 
     // base data dir configuration
-    _base_data_directory_path = vtpl::utilities::get_environment_value(std::string(DATA_DIR_ENV_VARIABLE_NAME));
-    if (_base_data_directory_path.empty()) {
-      _base_data_directory_path =
-          vtpl::utilities::merge_directories(_application_base_path, std::string(DATA_DIR_NAME));
-    }
+    _base_data_directory_path = vtpl::utilities::get_environment_value(
+        std::string(DATA_DIR_ENV_VARIABLE_NAME),
+        vtpl::utilities::merge_directories(_application_base_path, std::string(DATA_DIR_NAME)));
+
     if (!_p_first_conf->has(std::string(BASE_DATA_DIR_CONFIGURATION_NAME))) {
       _p_first_conf->setString(std::string(BASE_DATA_DIR_CONFIGURATION_NAME), _base_data_directory_path);
       config_file_save_counter++;
@@ -175,9 +189,9 @@ public:
     {
       std::string key = "COMMAND_PORT";
       // RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
-      int listening_port = Poco::NumberParser::parse(vtpl::utilities::get_environment_value(key));
+      // int listening_port = Poco::NumberParser::parse(vtpl::utilities::get_environment_value(key));
+      int listening_port = Poco::NumberParser::parse(_command_port);
       // int listening_port = config().getInt("system.env.COMMAND_PORT");
-
       std::unique_ptr<ProcessRunnerServiceRun> process_runner =
           std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
                                                     _base_data_directory_path, listening_port);
