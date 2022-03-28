@@ -35,7 +35,7 @@ void ProcessRunnerServiceRun::run()
 {
   RAY_LOG_INF << "Started";
   ::grpc::ServerBuilder builder;
-  builder.AddListeningPort(fmt::format("dns:///[::1]:{}", _listening_port), ::grpc::InsecureServerCredentials());
+  builder.AddListeningPort(fmt::format("[::]:{}", _listening_port), ::grpc::InsecureServerCredentials());
   ProcessRunnerService my_service(_application_installation_directory, _config_directory, _data_directory);
   builder.RegisterService(&my_service);
 

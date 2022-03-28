@@ -172,9 +172,9 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
-      std::string key = "DATA_ROOT";
+      std::string key = "COMMAND_PORT";
       RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
-      int listening_port = 8787;
+      int listening_port = 8787;//vtpl::utilities::get_environment_value(key));
       std::unique_ptr<ProcessRunnerServiceRun> process_runner =
           std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
                                                     _base_data_directory_path, listening_port);
