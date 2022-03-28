@@ -78,7 +78,7 @@ protected:
     _name_of_app = config().getString("application.baseName");
     _command_port = config().getString("command_port", vtpl::utilities::get_environment_value("COMMAND_PORT", "8787"));
     std::string s = vtpl::utilities::end_with_directory_seperator(_base_log_directory_path).str();
-    ::ray::RayLog::GetLoggerName();
+    s = ""; // FIXME(Monotosh)
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
   }
 
