@@ -18,12 +18,13 @@ private:
   std::string _config_directory;
   std::string _data_directory;
   std::unique_ptr<std::thread> _thread;
+  int _listening_port;
   void run();
   std::unique_ptr<grpc::Server> server;
 
 public:
   ProcessRunnerServiceRun(std::string application_installation_directory, std::string config_directory,
-                          std::string data_directory);
+                          std::string data_directory, int listening_port);
   ~ProcessRunnerServiceRun();
   void signal_to_stop();
 };

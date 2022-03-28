@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 ENV SHELL /bin/bash
 
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y sudo binutils git
+# RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y sudo binutils git
 
 # RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y libgtk-3-dev
 
@@ -19,3 +19,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN groupmod --gid $USER_GID $USERNAME \
     && usermod --uid $USER_UID --gid $USER_GID $USERNAME \
     && chown -R $USER_UID:$USER_GID /home/$USERNAME
+
+EXPOSE 8787
+COPY "./entry_point_server" "./entry_point_server"
+COPY "./media_converter" "./media_converter"
+
+ENTRYPOINT [ "./entry_point_server" ]

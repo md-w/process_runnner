@@ -174,8 +174,10 @@ public:
     {
       std::string key = "DATA_ROOT";
       RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
-      std::unique_ptr<ProcessRunnerServiceRun> process_runner = std::make_unique<ProcessRunnerServiceRun>(
-          get_application_installation_folder(), _base_config_directory_path, _base_data_directory_path);
+      int listening_port = 8787;
+      std::unique_ptr<ProcessRunnerServiceRun> process_runner =
+          std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
+                                                    _base_data_directory_path, listening_port);
       waitForTerminationRequest();
       process_runner->signal_to_stop();
     }
