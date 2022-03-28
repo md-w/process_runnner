@@ -378,5 +378,5 @@ std::string vtpl::utilities::get_environment_value(const std::string& value)
     return Poco::Environment::get(value);
   } catch (const Poco::NotFoundException& e) {
   }
-  return std::string();
+  return {std::string()};
 }
