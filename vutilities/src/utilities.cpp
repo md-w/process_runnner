@@ -372,3 +372,11 @@ std::string vtpl::utilities::compose_url(const std::string& url, const std::stri
 
   return url;
 }
+std::string vtpl::utilities::get_environment_value(const std::string& value)
+{
+  try {
+    return Poco::Environment::get(value);
+  } catch (const Poco::NotFoundException& e) {
+  }
+  return std::string();
+}

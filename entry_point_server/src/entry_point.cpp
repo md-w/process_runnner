@@ -26,6 +26,8 @@ private:
   std::string_view DATA_DIR_NAME{"Data"};
   std::string_view CONFIG_DIR_NAME{"Config"};
 
+  std::string_view DATA_DIR_ENV_VARIABLE_NAME{"DATA_ROOT"};
+
   std::string _name_of_app{};
   vtpl::globalerrorhandler _globalerrorhandler;
 
@@ -133,7 +135,11 @@ public:
     vtpl::utilities::create_directories(_base_log_directory_path);
 
     // base data dir configuration
-    _base_data_directory_path = vtpl::utilities::merge_directories(_application_base_path, std::string(DATA_DIR_NAME));
+    _base_data_directory_path = vtpl::utilities::get_environment_value(std::string(DATA_DIR_ENV_VARIABLE_NAME));
+    if (_base_data_directory_path.empty()) {
+      _base_data_directory_path =
+          vtpl::utilities::merge_directories(_application_base_path, std::string(DATA_DIR_NAME));
+    }
     if (!_p_first_conf->has(std::string(BASE_DATA_DIR_CONFIGURATION_NAME))) {
       _p_first_conf->setString(std::string(BASE_DATA_DIR_CONFIGURATION_NAME), _base_data_directory_path);
       config_file_save_counter++;
@@ -166,6 +172,8 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
+      std::string key = "DATA_ROOT";
+      RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
       std::unique_ptr<ProcessRunnerServiceRun> process_runner = std::make_unique<ProcessRunnerServiceRun>(
           get_application_installation_folder(), _base_config_directory_path, _base_data_directory_path);
       waitForTerminationRequest();
