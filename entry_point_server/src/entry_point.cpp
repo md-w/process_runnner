@@ -1,3 +1,4 @@
+#include <Poco/NumberParser.h>
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Util/XMLConfiguration.h>
@@ -173,8 +174,10 @@ public:
     load_first_configuration();
     {
       std::string key = "COMMAND_PORT";
-      RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
-      int listening_port = 8787;//vtpl::utilities::get_environment_value(key));
+      // RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
+      int listening_port = Poco::NumberParser::parse(vtpl::utilities::get_environment_value(key));
+      // int listening_port = config().getInt("system.env.COMMAND_PORT");
+
       std::unique_ptr<ProcessRunnerServiceRun> process_runner =
           std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
                                                     _base_data_directory_path, listening_port);
