@@ -55,7 +55,48 @@
                 "args": [],
                 "stopAtEntry": false,
                 "console": "integratedTerminal",
-                "environment": [],
+                "environment": [
+                    {
+                        "name": "COMMAND_PORT",
+                        "value": "8787"
+                    },
+                    {
+                        "name": "HLS_ROOT",
+                        "value": "live/hls"
+                    },
+                    {
+                        "name": "PUBLIC_DNS_SCHEME",
+                        "value": "https"
+                    },
+                    {
+                        "name": "PUBLIC_DNS",
+                        "value": "streaming.videonetics.com"
+                    },
+                    {
+                        "name": "HLS_PORT",
+                        "value": "8443"
+                    },
+                    {
+                        "name": "PUBLIC_DNS_RTMP",
+                        "value": "streamer.videonetics.com"
+                    },
+                    {
+                        "name": "RTMP_PORT_RANGE",
+                        "value": "9101-9119"
+                    },
+                    {
+                        "name": "JOB_CAPACITY",
+                        "value": "19"
+                    },
+                    {
+                        "name": "WWW_ROOT",
+                        "value": "/var/www/html"
+                    },
+                    {
+                        "name": "DATA_ROOT",
+                        "value": "/data/1"
+                    }
+                ],
                 "MIMode": "gdb",
                 "setupCommands": [
                     {

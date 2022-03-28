@@ -2,6 +2,7 @@
 //    Copyright 2022 Videonetics Technology Pvt Ltd
 // *****************************************************
 
+#include "Poco/Environment.h"
 #include <Poco/File.h>
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>
@@ -375,8 +376,10 @@ std::string vtpl::utilities::compose_url(const std::string& url, const std::stri
 std::string vtpl::utilities::get_environment_value(const std::string& value)
 {
   try {
-    return Poco::Environment::get(value);
+    if (Poco::Environment::has(value)) {
+      return Poco::Environment::get(value);
+    }
   } catch (const Poco::NotFoundException& e) {
   }
-  return std::string();
+  return std::string{};
 }
