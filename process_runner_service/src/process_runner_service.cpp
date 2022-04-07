@@ -14,8 +14,76 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
   ProcessRunner::set_config_directory(_config_directory);
   ProcessRunner::set_data_directory(_data_directory);
   ProcessRunner::set_initial_directory(_application_installation_directory);
+  _thread = std::make_unique<std::thread>(&ProcessRunnerService::monitor, this);
 }
 
+ProcessRunnerService::~ProcessRunnerService()
+{
+  _do_shutdown = true;
+  if (_thread->joinable()) {
+    _thread->join();
+  }
+}
+void ProcessRunnerService::_set_keep_alive(std::size_t key)
+{
+
+  std::lock_guard<std::mutex> lock(_process_runner_last_keep_alive_map_mtx);
+  if (_process_runner_last_keep_alive_map.find(key) == _process_runner_last_keep_alive_map.end()) {
+    _process_runner_last_keep_alive_map.emplace(std::pair(key, std::chrono::high_resolution_clock::now()));
+  } else {
+    _process_runner_last_keep_alive_map.at(key) = std::chrono::high_resolution_clock::now();
+  }
+}
+std::optional<bool> ProcessRunnerService::_is_running(std::size_t key)
+{
+  _set_keep_alive(key);
+  std::optional<bool> ret_val;
+  std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    ret_val.emplace(process_runner_map.at(key)->is_running());
+  }
+  return ret_val;
+}
+std::optional<int> ProcessRunnerService::_get_last_exit_code(std::size_t key)
+{
+  _set_keep_alive(key);
+  std::optional<int> ret_val;
+  std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    ret_val.emplace(process_runner_map.at(key)->get_last_exit_code());
+  }
+  return ret_val;
+}
+std::optional<int> ProcessRunnerService::_get_id(std::size_t key)
+{
+  _set_keep_alive(key);
+  std::optional<int> ret_val;
+  std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    ret_val.emplace(process_runner_map.at(key)->get_id());
+  }
+  return ret_val;
+}
+std::optional<std::string> ProcessRunnerService::_get_composite_command(std::size_t key)
+{
+  _set_keep_alive(key);
+  std::optional<std::string> ret_val;
+  std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    ret_val.emplace(process_runner_map.at(key)->get_composite_command());
+  }
+  return ret_val;
+}
+std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::size_t key)
+{
+  _set_keep_alive(key);
+  std::optional<std::string> ret_val;
+  std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+  if (process_runner_map.find(key) != process_runner_map.end()) {
+    ret_val.emplace(process_runner_map.at(key)->get_initial_directory());
+  }
+  return ret_val;
+}
 ::grpc::Status ProcessRunnerService::RunProcess(::grpc::ServerContext* /*context*/,
                                                 const data_models::RunProcessRequest* request,
                                                 data_models::RunProcessResponse* response)
@@ -26,40 +94,89 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
     process_runner_arguments.args.push_back(arg);
   }
   std::size_t key = data_models::hash_value(process_runner_arguments);
-  if (process_runner_map.find(key) == process_runner_map.end()) {
-    RAY_LOG_INF << "Adding new process runner " << key;
-    try {
-      process_runner_map.emplace(std::pair(
-          key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args)));
 
-    } catch (const std::exception& e) {
-      std::cerr << e.what() << '\n';
-      return ::grpc::Status::CANCELLED;
+  _set_keep_alive(key);
+  bool is_found = false;
+  {
+    std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+    if (process_runner_map.find(key) == process_runner_map.end()) {
+      try {
+        process_runner_map.emplace(std::pair(
+            key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args)));
+
+      } catch (const std::exception& e) {
+        RAY_LOG_ERR << "Error adding new process: " << key << " : " << e.what();
+        return ::grpc::Status::CANCELLED;
+      }
+    } else {
+      is_found = true;
     }
-
-  } else {
-    RAY_LOG_INF << "Key alrady exists";
+    response->set_exit_code(process_runner_map.at(key)->get_last_exit_code());
   }
-  response->set_exit_code(process_runner_map.at(key)->get_last_exit_code());
   response->set_message("Started");
   response->set_key(key);
   response->set_error_code(0);
+  if (is_found) {
+    RAY_LOG_INF << "Adding new process runner " << key;
+  } else {
+    RAY_LOG_INF << "Key alrady exists " << key;
+  }
   return ::grpc::Status::OK;
+}
+
+void ProcessRunnerService::monitor()
+{
+  while (!_do_shutdown) {
+    std::vector<std::size_t> keys_to_delete;
+    {
+      std::lock_guard<std::mutex> lock(_process_runner_last_keep_alive_map_mtx);
+      for (auto&& process_runner_last_keep_alive : _process_runner_last_keep_alive_map) {
+        auto stale_duration = std::chrono::duration_cast<std::chrono::seconds>(
+                                  std::chrono::high_resolution_clock::now() - process_runner_last_keep_alive.second)
+                                  .count();
+        if (stale_duration > 10) {
+          keys_to_delete.emplace_back(process_runner_last_keep_alive.first);
+        }
+      }
+    }
+    for (auto&& key : keys_to_delete) {
+      _signal_to_stop(key);
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+}
+
+bool ProcessRunnerService::_signal_to_stop(std::size_t key)
+{
+  RAY_LOG_INF << "Remove request received for " << key;
+  {
+    std::lock_guard<std::mutex> lock(_process_runner_last_keep_alive_map_mtx);
+    if (_process_runner_last_keep_alive_map.find(key) != _process_runner_last_keep_alive_map.end()) {
+      _process_runner_last_keep_alive_map.erase(key);
+    }
+  }
+  bool is_found = false;
+  {
+    std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+    if (process_runner_map.find(key) != process_runner_map.end()) {
+      process_runner_map.at(key)->signal_to_stop();
+      process_runner_map.erase(key);
+      is_found = true;
+    }
+  }
+  if (is_found) {
+    RAY_LOG_INF << "Removed process runner " << key;
+  }
+  return is_found;
 }
 
 ::grpc::Status ProcessRunnerService::SignalToStop(::grpc::ServerContext* /*context*/,
                                                   const data_models::SignalToStopRequest* request,
                                                   data_models::SignalToStopResponse* response)
 {
-  bool is_found = false;
   std::size_t key = request->key();
-  if (process_runner_map.find(key) != process_runner_map.end()) {
-    process_runner_map.at(key)->signal_to_stop();
-    process_runner_map.erase(key);
-    is_found = true;
-    RAY_LOG_INF << "Removing process runner " << key;
-  }
-
+  bool is_found = _signal_to_stop(key);
   if (is_found) {
     response->set_error_code(0);
   } else {
@@ -76,12 +193,15 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
 {
   bool is_found = false;
   std::size_t key = request->key();
-  if (process_runner_map.find(key) != process_runner_map.end()) {
-    response->set_value(process_runner_map.at(key)->is_running());
+  bool is_running = false;
+  std::optional<bool> ret_val = _is_running(key);
+  if (ret_val) {
     is_found = true;
+    is_running = *ret_val;
   }
   if (is_found) {
     response->set_error_code(0);
+    response->set_value(is_running);
   } else {
     response->set_error_code(1);
   }
@@ -95,12 +215,15 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
 {
   bool is_found = false;
   std::size_t key = request->key();
-  if (process_runner_map.find(key) != process_runner_map.end()) {
-    response->set_value(process_runner_map.at(key)->get_last_exit_code());
+  int get_last_exit_code = 0;
+  std::optional<int> ret_val = _get_last_exit_code(key);
+  if (ret_val) {
     is_found = true;
+    get_last_exit_code = *ret_val;
   }
   if (is_found) {
     response->set_error_code(0);
+    response->set_value(get_last_exit_code);
   } else {
     response->set_error_code(1);
   }
@@ -114,14 +237,19 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
 {
   bool is_found = false;
   std::size_t key = request->key();
-  if (process_runner_map.find(key) != process_runner_map.end()) {
-    response->set_value(process_runner_map.at(key)->get_id());
+  int get_id = 0;
+  std::optional<int> ret_val = _get_id(key);
+  if (ret_val) {
     is_found = true;
+    get_id = *ret_val;
   }
+
   if (is_found) {
     response->set_error_code(0);
+    response->set_value(get_id);
   } else {
     response->set_error_code(1);
+    response->set_value(get_id);
   }
   response->set_key(key);
 
@@ -134,12 +262,16 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
 {
   bool is_found = false;
   std::size_t key = request->key();
-  if (process_runner_map.find(key) != process_runner_map.end()) {
-    response->set_value(process_runner_map.at(key)->get_composite_command());
+  std::string get_composite_command;
+  std::optional<std::string> ret_val = _get_composite_command(key);
+  if (ret_val) {
     is_found = true;
+    get_composite_command = *ret_val;
   }
+
   if (is_found) {
     response->set_error_code(0);
+    response->set_value(get_composite_command);
   } else {
     response->set_error_code(1);
   }
@@ -154,12 +286,15 @@ ProcessRunnerService::ProcessRunnerService(std::string application_installation_
 {
   bool is_found = false;
   std::size_t key = request->key();
-  if (process_runner_map.find(key) != process_runner_map.end()) {
-    response->set_value(process_runner_map.at(key)->get_initial_directory());
+  std::string get_initial_directory;
+  std::optional<std::string> ret_val = _get_initial_directory(key);
+  if (ret_val) {
     is_found = true;
+    get_initial_directory = *ret_val;
   }
   if (is_found) {
     response->set_error_code(0);
+    response->set_value(get_initial_directory);
   } else {
     response->set_error_code(1);
   }

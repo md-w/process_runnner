@@ -6,23 +6,44 @@
 #ifndef process_runner_service_h
 #define process_runner_service_h
 
+#include <chrono>
 #include <grpc/grpc.h>
 #include <map>
 #include <memory>
+#include <thread>
+#include <mutex>
 
 #include "protobuf_helper.h"
 
 class ProcessRunnerService final : public data_models::ProcessRunner::Service
 {
 private:
+  std::mutex _process_runner_map_mtx;
+  std::mutex _process_runner_last_keep_alive_map_mtx;
   std::map<std::size_t, std::unique_ptr<ProcessRunner>> process_runner_map;
+  std::map<std::size_t, std::chrono::high_resolution_clock::time_point> _process_runner_last_keep_alive_map;
   std::string _application_installation_directory;
   std::string _config_directory;
   std::string _data_directory;
+  std::atomic_bool _do_shutdown{false};
+  std::unique_ptr<std::thread> _thread;
+  /**
+   * This function runs in a different thread and monitors if the IsRunning called at regular interval
+   * If the keep alive is not called then the process_runner is removed from the list
+   */
+  void monitor();
+  bool _signal_to_stop(std::size_t key);
+  void _set_keep_alive(std::size_t key);
+  std::optional<bool> _is_running(std::size_t key);
+  std::optional<int> _get_last_exit_code(std::size_t key);
+  std::optional<int> _get_id(std::size_t key);
+  std::optional<std::string> _get_composite_command(std::size_t key);
+  std::optional<std::string> _get_initial_directory(std::size_t key);
 
 public:
   ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
                        std::string data_directory);
+  ~ProcessRunnerService();
 
   ::grpc::Status
   GetApplicationInstallationDirectory(::grpc::ServerContext* context,
@@ -33,9 +54,8 @@ public:
                                     const data_models::GetConfigDirectoryRequest* request,
                                     data_models::GetConfigDirectoryResponse* response) override;
 
-  ::grpc::Status GetDataDirectory(::grpc::ServerContext* context,
-                                    const data_models::GetDataDirectoryRequest* request,
-                                    data_models::GetDataDirectoryResponse* response) override;
+  ::grpc::Status GetDataDirectory(::grpc::ServerContext* context, const data_models::GetDataDirectoryRequest* request,
+                                  data_models::GetDataDirectoryResponse* response) override;
 
   ::grpc::Status RunProcess(::grpc::ServerContext* context, const data_models::RunProcessRequest* request,
                             data_models::RunProcessResponse* response) override;

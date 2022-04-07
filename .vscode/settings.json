@@ -109,4 +109,5 @@
         "string_view": "cpp",
         "cfenv": "cpp"
     },
+    "remote.localPortHost": "allInterfaces",
 }

@@ -76,7 +76,7 @@ protected:
     Poco::ErrorHandler::set(&_globalerrorhandler);
     load_first_configuration();
     _name_of_app = config().getString("application.baseName");
-    _command_port = config().getString("command_port", vtpl::utilities::get_environment_value("COMMAND_PORT", "8787"));
+    _command_port = vtpl::utilities::get_environment_value("COMMAND_PORT", config().getString("command_port", "8787"));
     std::string s = vtpl::utilities::end_with_directory_seperator(_base_log_directory_path).str();
     ::ray::RayLog::GetLoggerName();
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
@@ -111,11 +111,15 @@ private:
   std::string _base_data_directory_path;
   std::string _base_config_directory_path;
   Poco::AutoPtr<Poco::Util::XMLConfiguration> _p_first_conf;
+  Poco::AutoPtr<Poco::Util::XMLConfiguration> _p_conf;
 
   bool _start_playing{true};
 
 public:
-  entry_point() : _p_first_conf(new Poco::Util::XMLConfiguration()) { setUnixOptions(true); }
+  entry_point() : _p_first_conf(new Poco::Util::XMLConfiguration()), _p_conf(new Poco::Util::XMLConfiguration())
+  {
+    setUnixOptions(true);
+  }
 
   // void get_application_base_dirs()
   // {
@@ -124,6 +128,7 @@ public:
   // _base_data_directory_path = config().getString("application.dataDir");
   // }
 
+  void load_configuration() {}
   void load_first_configuration()
   {
     int config_file_save_counter = 0;
@@ -187,11 +192,7 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     {
-      std::string key = "COMMAND_PORT";
-      // RAY_LOG_INF << "Environment value: for " << key << " [" << vtpl::utilities::get_environment_value(key) << "]";
-      // int listening_port = Poco::NumberParser::parse(vtpl::utilities::get_environment_value(key));
       int listening_port = Poco::NumberParser::parse(_command_port);
-      // int listening_port = config().getInt("system.env.COMMAND_PORT");
       std::unique_ptr<ProcessRunnerServiceRun> process_runner =
           std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
                                                     _base_data_directory_path, listening_port);
