@@ -7,9 +7,9 @@
 #include "logging.h"
 #include "process_runner_client.h"
 
-ProcessRunnerClient::ProcessRunnerClient(std::string command, std::vector<std::string> args,
+ProcessRunnerClient::ProcessRunnerClient(std::string command, std::vector<std::string> args, int number,
                                          std::shared_ptr<ProcessRunnerServiceCaller> service_caller)
-    : _command(std::move(command)), _args(std::move(args)), _service_caller(std::move(service_caller))
+    : _command(std::move(command)), _args(std::move(args)), _number(number), _service_caller(std::move(service_caller))
 {
   std::stringstream ss;
   ss << "[";
@@ -18,7 +18,7 @@ ProcessRunnerClient::ProcessRunnerClient(std::string command, std::vector<std::s
     ss << " ";
     ss << piece;
   }
-  ss << "]";
+  ss << "] number : " << _number;
 
   _composite_command = ss.str();
 
@@ -68,7 +68,7 @@ void ProcessRunnerClient::run()
   }
 }
 
-void ProcessRunnerClient::run_process() { _key = _service_caller->run_process(_command, _args); }
+void ProcessRunnerClient::run_process() { _key = _service_caller->run_process(_command, _args, _number); }
 
 bool ProcessRunnerClient::is_running() { return _service_caller->is_running(_key); }
 

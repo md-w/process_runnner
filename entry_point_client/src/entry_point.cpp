@@ -196,12 +196,13 @@ public:
           process_runner_service_caller->get_application_installation_directory(), "ffrecorder");
       std::string recording_dir = vtpl::utilities::merge_directories(
           process_runner_service_caller->get_data_directory(), "4dc75/98c9a/recording_clip/major");
+      int number = process_runner_service_caller->get_next_number();
       std::vector<std::string> args;
       args.emplace_back("-i");
       args.emplace_back("rtsp://admin:AdmiN1234@192.168.0.35/media/video1");
       args.emplace_back("-o");
       args.emplace_back(recording_dir);
-      ProcessRunnerClient process_runner_client(command, args, process_runner_service_caller);
+      ProcessRunnerClient process_runner_client(command, args, number, process_runner_service_caller);
       waitForTerminationRequest();
     }
     if (false) {

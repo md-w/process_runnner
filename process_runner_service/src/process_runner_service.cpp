@@ -90,11 +90,15 @@ int ProcessRunnerService::get_usable_number()
   int ret_val = 0;
   bool is_usable = false;
   for (int number = _number_start; number <= _number_end; number++) {
-
-    if (_blocked_number_keep_block_map.find(number) == _blocked_number_keep_block_map.end()) {
-
+    {
+      std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
+      if (_blocked_number_keep_block_map.find(number) == _blocked_number_keep_block_map.end()) {
+        is_usable = true;
+      }
+    }
+    if (is_usable) {
       std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
-      is_usable = true;
+
       for (auto&& v : process_runner_map) {
         if (v.second->get_number() == number) {
           is_usable = false;
@@ -103,8 +107,9 @@ int ProcessRunnerService::get_usable_number()
       }
     }
     if (is_usable) {
-      ret_val = number;
+      std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
       _blocked_number_keep_block_map.emplace(std::pair(number, std::chrono::high_resolution_clock::now()));
+      ret_val = number;
       break;
     }
   }
@@ -127,9 +132,9 @@ int ProcessRunnerService::get_usable_number()
     std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
     if (process_runner_map.find(key) == process_runner_map.end()) {
       try {
-        process_runner_map.emplace(std::pair(
-            key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args,
-                                                 number)));
+        process_runner_map.emplace(
+            std::pair(key, std::make_unique<ProcessRunner>(process_runner_arguments.command,
+                                                           process_runner_arguments.args, number)));
 
       } catch (const std::exception& e) {
         RAY_LOG_ERR << "Error adding new process: " << key << " : " << e.what();
@@ -139,6 +144,12 @@ int ProcessRunnerService::get_usable_number()
       is_found = true;
     }
     response->set_exit_code(process_runner_map.at(key)->get_last_exit_code());
+  }
+  {
+    std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
+    if (_blocked_number_keep_block_map.find(number) != _blocked_number_keep_block_map.end()) {
+      _blocked_number_keep_block_map.erase(number);
+    }
   }
   response->set_message("Started");
   response->set_key(key);
@@ -158,18 +169,27 @@ void ProcessRunnerService::monitor()
     auto now = std::chrono::high_resolution_clock::now();
     {
       std::lock_guard<std::mutex> lock(_process_runner_last_keep_alive_map_mtx);
-      for (auto&& process_runner_last_keep_alive : _process_runner_last_keep_alive_map) {
-        auto stale_duration =
-            std::chrono::duration_cast<std::chrono::seconds>(now - process_runner_last_keep_alive.second).count();
+      for (auto&& v : _process_runner_last_keep_alive_map) {
+        auto stale_duration = std::chrono::duration_cast<std::chrono::seconds>(now - v.second).count();
         if (stale_duration > 10) {
-          keys_to_delete.emplace_back(process_runner_last_keep_alive.first);
+          keys_to_delete.emplace_back(v.first);
         }
       }
     }
     for (auto&& key : keys_to_delete) {
       _signal_to_stop(key);
     }
-
+    {
+      std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
+      for (auto it = _blocked_number_keep_block_map.begin(); it != _blocked_number_keep_block_map.end();) {
+        auto stale_duration = std::chrono::duration_cast<std::chrono::seconds>(now - it->second).count();
+        if (stale_duration > 10) {
+          it = _blocked_number_keep_block_map.erase(it);
+        } else {
+          it++;
+        }
+      }
+    }
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 }
@@ -184,18 +204,13 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
     }
   }
   bool is_found = false;
-  int number = 0;
   {
     std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
     if (process_runner_map.find(key) != process_runner_map.end()) {
       process_runner_map.at(key)->signal_to_stop();
-      number = process_runner_map.at(key)->get_number();
       process_runner_map.erase(key);
       is_found = true;
     }
-  }
-  if (_blocked_number_keep_block_map.find(number) != _blocked_number_keep_block_map.end()) {
-    _blocked_number_keep_block_map.erase(number);
   }
   if (is_found) {
     RAY_LOG_INF << "Removed process runner " << key;
@@ -362,8 +377,8 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
   return ::grpc::Status::OK;
 }
 
-::grpc::Status ProcessRunnerService::GetNextNumber(::grpc::ServerContext* context,
-                                                   const data_models::GetNextNumberRequest* request,
+::grpc::Status ProcessRunnerService::GetNextNumber(::grpc::ServerContext* /*context*/,
+                                                   const data_models::GetNextNumberRequest* /*request*/,
                                                    data_models::GetNextNumberResponse* response)
 {
   response->set_error_code(0);

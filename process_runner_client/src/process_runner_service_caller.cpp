@@ -8,13 +8,14 @@ ProcessRunnerServiceCaller::ProcessRunnerServiceCaller(std::shared_ptr<grpc::Cha
     : _stub(data_models::ProcessRunner::NewStub(channel))
 {
 }
-std::size_t ProcessRunnerServiceCaller::run_process(std::string command, std::vector<std::string> args)
+std::size_t ProcessRunnerServiceCaller::run_process(std::string command, std::vector<std::string> args, int number)
 {
   size_t key = 0;
   ::grpc::ClientContext context;
   data_models::RunProcessRequest request;
   request.set_command(command);
   *request.mutable_args() = {args.begin(), args.end()};
+  request.set_number(number);
   data_models::RunProcessResponse response;
   grpc::Status status = _stub->RunProcess(&context, request, &response);
   if (status.ok()) {
@@ -177,6 +178,22 @@ std::string ProcessRunnerServiceCaller::get_data_directory()
   data_models::GetDataDirectoryRequest request;
   data_models::GetDataDirectoryResponse response;
   grpc::Status status = _stub->GetDataDirectory(&context, request, &response);
+  if (status.ok()) {
+    return response.value();
+  }
+  std::stringstream err;
+  err << "Error: ";
+  err << status.error_code();
+  RAY_LOG_ERR << err.str();
+  throw std::runtime_error(err.str());
+}
+
+int ProcessRunnerServiceCaller::get_next_number()
+{
+  ::grpc::ClientContext context;
+  data_models::GetNextNumberRequest request;
+  data_models::GetNextNumberResponse response;
+  grpc::Status status = _stub->GetNextNumber(&context, request, &response);
   if (status.ok()) {
     return response.value();
   }

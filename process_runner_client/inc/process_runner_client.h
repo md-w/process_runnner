@@ -24,6 +24,7 @@ private:
   std::string _command;
   std::vector<std::string> _args;
   std::string _composite_command;
+  int _number;
 
   std::size_t _key{0};
   std::atomic_bool _do_shutdown{false};
@@ -35,7 +36,7 @@ private:
   void stop();
 
 public:
-  ProcessRunnerClient(std::string command, std::vector<std::string> args,
+  ProcessRunnerClient(std::string command, std::vector<std::string> args, int number,
                       std::shared_ptr<ProcessRunnerServiceCaller> service_caller);
   virtual ~ProcessRunnerClient();
 
