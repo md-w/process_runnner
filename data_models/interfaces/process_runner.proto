@@ -8,119 +8,123 @@ option objc_class_prefix = "PR";
 package data_models;
 
 // The greeting service definition.
-service ProcessRunner {
+service ProcessRunner
+{
   // Sends a greeting
-  rpc RunProcess (RunProcessRequest) returns (RunProcessResponse) {}
-  rpc SignalToStop (SignalToStopRequest) returns (SignalToStopResponse) {}
-  rpc IsRunning (IsRunningRequest) returns (IsRunningResponse) {}
-  rpc GetLastExitCode (GetLastExitCodeRequest) returns (GetLastExitCodeResponse) {}
-  rpc GetId (GetIdRequest) returns (GetIdResponse) {}
-  rpc GetCompositeCommand (GetCompositeCommandRequest) returns (GetCompositeCommandResponse) {}
-  rpc GetInitialDirectory (GetInitialDirectoryRequest) returns (GetInitialDirectoryResponse) {}
-  rpc GetApplicationInstallationDirectory (GetApplicationInstallationDirectoryRequest) returns (GetApplicationInstallationDirectoryResponse) {}
-  rpc GetConfigDirectory (GetConfigDirectoryRequest) returns (GetConfigDirectoryResponse) {}
-  rpc GetDataDirectory (GetDataDirectoryRequest) returns (GetDataDirectoryResponse) {}
+  rpc RunProcess(RunProcessRequest) returns (RunProcessResponse) {}
+  rpc SignalToStop(SignalToStopRequest) returns (SignalToStopResponse) {}
+  rpc IsRunning(IsRunningRequest) returns (IsRunningResponse) {}
+  rpc GetLastExitCode(GetLastExitCodeRequest) returns (GetLastExitCodeResponse) {}
+  rpc GetId(GetIdRequest) returns (GetIdResponse) {}
+  rpc GetCompositeCommand(GetCompositeCommandRequest) returns (GetCompositeCommandResponse) {}
+  rpc GetInitialDirectory(GetInitialDirectoryRequest) returns (GetInitialDirectoryResponse) {}
+  rpc GetApplicationInstallationDirectory(GetApplicationInstallationDirectoryRequest)
+      returns (GetApplicationInstallationDirectoryResponse)
+  {
+  }
+  rpc GetConfigDirectory(GetConfigDirectoryRequest) returns (GetConfigDirectoryResponse) {}
+  rpc GetDataDirectory(GetDataDirectoryRequest) returns (GetDataDirectoryResponse) {}
+  rpc GetNextNumber(GetNextNumberRequest) returns (GetNextNumberResponse) {}
 }
 
 // The request message containing the command and arguments.
-message RunProcessRequest {
+message RunProcessRequest
+{
   string command = 1;
   repeated string args = 2;
+  int32 number = 3;
 }
 
 // The response message containing the greetings
-message RunProcessResponse {
+message RunProcessResponse
+{
   uint64 key = 1;
   int64 error_code = 2;
   string message = 3;
   int64 exit_code = 4;
 }
 
-message SignalToStopRequest {
-  uint64 key = 1;
-}
+message SignalToStopRequest { uint64 key = 1; }
 
-message SignalToStopResponse {
+message SignalToStopResponse
+{
   uint64 key = 1;
   int64 error_code = 2;
 }
 
-message IsRunningRequest {
-  uint64 key = 1;
-}
+message IsRunningRequest { uint64 key = 1; }
 
-message IsRunningResponse {
+message IsRunningResponse
+{
   uint64 key = 1;
   int64 error_code = 2;
   bool value = 3;
 }
 
-message GetLastExitCodeRequest {
-  uint64 key = 1;
-}
+message GetLastExitCodeRequest { uint64 key = 1; }
 
-message GetLastExitCodeResponse {
-  uint64 key = 1;
-  int64 error_code = 2;
-  int32 value = 3;
-}
-
-message GetIdRequest {
-  uint64 key = 1;
-}
-
-message GetIdResponse {
+message GetLastExitCodeResponse
+{
   uint64 key = 1;
   int64 error_code = 2;
   int32 value = 3;
 }
 
-message GetCompositeCommandRequest {
-  uint64 key = 1;
-}
+message GetIdRequest { uint64 key = 1; }
 
-message GetCompositeCommandResponse {
+message GetIdResponse
+{
   uint64 key = 1;
   int64 error_code = 2;
-  string value = 3;
+  int32 value = 3;
 }
 
-message GetInitialDirectoryRequest {
-  uint64 key = 1;
-}
+message GetCompositeCommandRequest { uint64 key = 1; }
 
-message GetInitialDirectoryResponse {
+message GetCompositeCommandResponse
+{
   uint64 key = 1;
   int64 error_code = 2;
   string value = 3;
 }
 
-message GetApplicationInstallationDirectoryRequest {
+message GetInitialDirectoryRequest { uint64 key = 1; }
 
-}
-
-message GetApplicationInstallationDirectoryResponse {
-
+message GetInitialDirectoryResponse
+{
+  uint64 key = 1;
   int64 error_code = 2;
   string value = 3;
 }
 
-message GetConfigDirectoryRequest {
+message GetApplicationInstallationDirectoryRequest {}
 
-}
-
-message GetConfigDirectoryResponse {
-
+message GetApplicationInstallationDirectoryResponse
+{
   int64 error_code = 2;
   string value = 3;
 }
 
-message GetDataDirectoryRequest {
+message GetConfigDirectoryRequest {}
 
-}
-
-message GetDataDirectoryResponse {
-
+message GetConfigDirectoryResponse
+{
   int64 error_code = 2;
   string value = 3;
+}
+
+message GetDataDirectoryRequest {}
+
+message GetDataDirectoryResponse
+{
+  int64 error_code = 2;
+  string value = 3;
+}
+
+message GetNextNumberRequest {}
+
+message GetNextNumberResponse
+{
+  int64 error_code = 2;
+  int32 value = 3;
 }

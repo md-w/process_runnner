@@ -6,9 +6,10 @@
 #include "logging.h"
 
 ProcessRunnerService::ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
-                                           std::string data_directory)
+                                           std::string data_directory, int number_start, int number_end)
     : _application_installation_directory(std::move(application_installation_directory)),
-      _config_directory(std::move(config_directory)), _data_directory(std::move(data_directory))
+      _config_directory(std::move(config_directory)), _data_directory(std::move(data_directory)),
+      _number_start(number_start), _number_end(number_end)
 {
   ProcessRunner::set_application_installation_directory(_application_installation_directory);
   ProcessRunner::set_config_directory(_config_directory);
@@ -84,6 +85,31 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
   }
   return ret_val;
 }
+int ProcessRunnerService::get_usable_number()
+{
+  int ret_val = 0;
+  bool is_usable = false;
+  for (int number = _number_start; number <= _number_end; number++) {
+
+    if (_blocked_number_keep_block_map.find(number) == _blocked_number_keep_block_map.end()) {
+
+      std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+      is_usable = true;
+      for (auto&& v : process_runner_map) {
+        if (v.second->get_number() == number) {
+          is_usable = false;
+          break;
+        }
+      }
+    }
+    if (is_usable) {
+      ret_val = number;
+      _blocked_number_keep_block_map.emplace(std::pair(number, std::chrono::high_resolution_clock::now()));
+      break;
+    }
+  }
+  return ret_val;
+}
 ::grpc::Status ProcessRunnerService::RunProcess(::grpc::ServerContext* /*context*/,
                                                 const data_models::RunProcessRequest* request,
                                                 data_models::RunProcessResponse* response)
@@ -94,15 +120,16 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
     process_runner_arguments.args.push_back(arg);
   }
   std::size_t key = data_models::hash_value(process_runner_arguments);
-
   _set_keep_alive(key);
+  int number = request->number();
   bool is_found = false;
   {
     std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
     if (process_runner_map.find(key) == process_runner_map.end()) {
       try {
         process_runner_map.emplace(std::pair(
-            key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args)));
+            key, std::make_unique<ProcessRunner>(process_runner_arguments.command, process_runner_arguments.args,
+                                                 number)));
 
       } catch (const std::exception& e) {
         RAY_LOG_ERR << "Error adding new process: " << key << " : " << e.what();
@@ -128,12 +155,12 @@ void ProcessRunnerService::monitor()
 {
   while (!_do_shutdown) {
     std::vector<std::size_t> keys_to_delete;
+    auto now = std::chrono::high_resolution_clock::now();
     {
       std::lock_guard<std::mutex> lock(_process_runner_last_keep_alive_map_mtx);
       for (auto&& process_runner_last_keep_alive : _process_runner_last_keep_alive_map) {
-        auto stale_duration = std::chrono::duration_cast<std::chrono::seconds>(
-                                  std::chrono::high_resolution_clock::now() - process_runner_last_keep_alive.second)
-                                  .count();
+        auto stale_duration =
+            std::chrono::duration_cast<std::chrono::seconds>(now - process_runner_last_keep_alive.second).count();
         if (stale_duration > 10) {
           keys_to_delete.emplace_back(process_runner_last_keep_alive.first);
         }
@@ -157,13 +184,18 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
     }
   }
   bool is_found = false;
+  int number = 0;
   {
     std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
     if (process_runner_map.find(key) != process_runner_map.end()) {
       process_runner_map.at(key)->signal_to_stop();
+      number = process_runner_map.at(key)->get_number();
       process_runner_map.erase(key);
       is_found = true;
     }
+  }
+  if (_blocked_number_keep_block_map.find(number) != _blocked_number_keep_block_map.end()) {
+    _blocked_number_keep_block_map.erase(number);
   }
   if (is_found) {
     RAY_LOG_INF << "Removed process runner " << key;
@@ -327,5 +359,16 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
 {
   response->set_error_code(0);
   response->set_value(_data_directory);
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status ProcessRunnerService::GetNextNumber(::grpc::ServerContext* context,
+                                                   const data_models::GetNextNumberRequest* request,
+                                                   data_models::GetNextNumberResponse* response)
+{
+  response->set_error_code(0);
+  int number = get_usable_number();
+  RAY_LOG_INF << "Returning usable number as: " << number;
+  response->set_value(number);
   return ::grpc::Status::OK;
 }

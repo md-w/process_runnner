@@ -38,8 +38,10 @@ void ProcessRunner::set_config_directory(const std::string& config_directory_) {
 
 void ProcessRunner::set_data_directory(const std::string& data_directory_) { data_directory = data_directory_; }
 
-ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args, std::string initial_directory)
-    : _command(std::move(command)), _args(std::move(args)), _initial_directory(std::move(initial_directory))
+ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args, int number,
+                             std::string initial_directory)
+    : _command(std::move(command)), _args(std::move(args)), _initial_directory(std::move(initial_directory)),
+      _number(number)
 {
   std::stringstream ss;
   ss << "[";
@@ -48,7 +50,7 @@ ProcessRunner::ProcessRunner(std::string command, std::vector<std::string> args,
     ss << " ";
     ss << piece;
   }
-  ss << "]";
+  ss << "] number: " << _number;
 
   _composite_command = ss.str();
   // _thread = std::make_unique<std::thread>(&ProcessRunner::run, this);
@@ -139,3 +141,5 @@ void ProcessRunner::run()
   }
   RAY_LOG_INF << "Thread Stopped for " << _composite_command << " from: " << _initial_directory;
 }
+
+int ProcessRunner::get_number() { return _number; }
