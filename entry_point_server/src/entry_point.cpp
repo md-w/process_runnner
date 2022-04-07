@@ -2,6 +2,7 @@
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Util/XMLConfiguration.h>
+#include <absl/strings/str_split.h>
 #include <iostream>
 #include <sstream>
 #include <string_view>
@@ -17,7 +18,7 @@
 class entry_point : public Poco::Util::ServerApplication
 {
 private:
-  std::string_view INITIAL_CONFIGURATION_FILE_NAME{"conf.xml"};
+  std::string_view CONFIGURATION_FILE_NAME{"conf.xml"};
   std::string_view BASE_LOG_DIR_CONFIGURATION_NAME{"logDir"};
   std::string_view BASE_DATA_DIR_CONFIGURATION_NAME{"dataDir"};
   std::string_view BASE_CONFIG_DIR_CONFIGURATION_NAME{"configDir"};
@@ -75,8 +76,8 @@ protected:
     ServerApplication::initialize(self);
     Poco::ErrorHandler::set(&_globalerrorhandler);
     load_first_configuration();
+    load_configuration();
     _name_of_app = config().getString("application.baseName");
-    _command_port = vtpl::utilities::get_environment_value("COMMAND_PORT", config().getString("command_port", "8787"));
     std::string s = vtpl::utilities::end_with_directory_seperator(_base_log_directory_path).str();
     ::ray::RayLog::GetLoggerName();
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
@@ -110,6 +111,7 @@ private:
   std::string _base_log_directory_path;
   std::string _base_data_directory_path;
   std::string _base_config_directory_path;
+  std::string _number_range;
   Poco::AutoPtr<Poco::Util::XMLConfiguration> _p_first_conf;
   Poco::AutoPtr<Poco::Util::XMLConfiguration> _p_conf;
 
@@ -128,48 +130,20 @@ public:
   // _base_data_directory_path = config().getString("application.dataDir");
   // }
 
-  void load_configuration() {}
   void load_first_configuration()
   {
     int config_file_save_counter = 0;
 
     _application_base_path = get_session_folder();
 
-    std::string first_conf_file_path = vtpl::utilities::merge_directories(get_application_installation_folder(),
-                                                                          std::string(INITIAL_CONFIGURATION_FILE_NAME));
+    std::string first_conf_file_path =
+        vtpl::utilities::merge_directories(get_application_installation_folder(), std::string(CONFIGURATION_FILE_NAME));
 
     if (vtpl::utilities::is_regular_file_exists(first_conf_file_path)) {
       _p_first_conf->load(first_conf_file_path);
     } else {
       config_file_save_counter++;
     }
-
-    _base_log_directory_path = vtpl::utilities::merge_directories(_application_base_path, std::string(LOG_DIR_NAME));
-    // base log dir configuration
-    if (!_p_first_conf->has(std::string{BASE_LOG_DIR_CONFIGURATION_NAME})) {
-      _p_first_conf->setString(std::string(BASE_LOG_DIR_CONFIGURATION_NAME), _base_log_directory_path);
-      config_file_save_counter++;
-    }
-    _base_log_directory_path =
-        _p_first_conf->getString(std::string(BASE_LOG_DIR_CONFIGURATION_NAME), _base_log_directory_path);
-
-    vtpl::utilities::create_directories(_base_log_directory_path);
-
-    // base data dir configuration
-    _base_data_directory_path = vtpl::utilities::get_environment_value(
-        std::string(DATA_DIR_ENV_VARIABLE_NAME),
-        vtpl::utilities::merge_directories(_application_base_path, std::string(DATA_DIR_NAME)));
-
-    if (!_p_first_conf->has(std::string(BASE_DATA_DIR_CONFIGURATION_NAME))) {
-      _p_first_conf->setString(std::string(BASE_DATA_DIR_CONFIGURATION_NAME), _base_data_directory_path);
-      config_file_save_counter++;
-    }
-
-    _base_data_directory_path =
-        _p_first_conf->getString(std::string(BASE_DATA_DIR_CONFIGURATION_NAME), _base_data_directory_path);
-
-    vtpl::utilities::create_directories(_base_data_directory_path);
-
     // base config dir configuration
     _base_config_directory_path =
         vtpl::utilities::merge_directories(_application_base_path, std::string(CONFIG_DIR_NAME));
@@ -181,24 +155,75 @@ public:
         _p_first_conf->getString(std::string(BASE_CONFIG_DIR_CONFIGURATION_NAME), _base_config_directory_path);
 
     vtpl::utilities::create_directories(_base_config_directory_path);
-
     if (config_file_save_counter > 0) {
       _p_first_conf->save(first_conf_file_path);
+    }
+  }
+  void load_configuration()
+  {
+    int config_file_save_counter = 0;
+    std::string conf_file_path =
+        vtpl::utilities::merge_directories(_base_config_directory_path, std::string(CONFIGURATION_FILE_NAME));
+
+    if (vtpl::utilities::is_regular_file_exists(conf_file_path)) {
+      _p_first_conf->load(conf_file_path);
+    } else {
+      config_file_save_counter++;
+    }
+
+    _base_log_directory_path = vtpl::utilities::merge_directories(_application_base_path, std::string(LOG_DIR_NAME));
+    // base log dir configuration
+    if (!_p_conf->has(std::string{BASE_LOG_DIR_CONFIGURATION_NAME})) {
+      _p_conf->setString(std::string(BASE_LOG_DIR_CONFIGURATION_NAME), _base_log_directory_path);
+      config_file_save_counter++;
+    }
+    _base_log_directory_path =
+        _p_conf->getString(std::string(BASE_LOG_DIR_CONFIGURATION_NAME), _base_log_directory_path);
+
+    vtpl::utilities::create_directories(_base_log_directory_path);
+
+    // base data dir configuration
+    _base_data_directory_path = vtpl::utilities::get_environment_value(
+        std::string(DATA_DIR_ENV_VARIABLE_NAME),
+        _p_conf->getString(std::string(BASE_DATA_DIR_CONFIGURATION_NAME),
+                           vtpl::utilities::merge_directories(_application_base_path, std::string(DATA_DIR_NAME))));
+    _p_conf->setString(std::string(BASE_DATA_DIR_CONFIGURATION_NAME), _base_data_directory_path);
+    config_file_save_counter++;
+
+    vtpl::utilities::create_directories(_base_data_directory_path);
+    _command_port = vtpl::utilities::get_environment_value(
+        "COMMAND_PORT", config().getString("command_port", _p_conf->getString("command_port", "8787")));
+    _p_conf->setString("command_port", _command_port);
+    config_file_save_counter++;
+    _number_range = vtpl::utilities::get_environment_value(
+        "RTMP_PORT_RANGE", config().getString("rtmp_port_range", _p_conf->getString("rtmp_port_range", "9101-9119")));
+    _p_conf->setString("rtmp_port_range", _number_range);
+    config_file_save_counter++;
+    if (config_file_save_counter > 0) {
+      _p_conf->save(conf_file_path);
     }
   }
 
   int main(const ArgVec& /*args*/) final
   {
     RAY_LOG_INF << "Started";
-    load_first_configuration();
-    {
-      int listening_port = Poco::NumberParser::parse(_command_port);
-      std::unique_ptr<ProcessRunnerServiceRun> process_runner =
-          std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
-                                                    _base_data_directory_path, listening_port);
-      waitForTerminationRequest();
-      process_runner->signal_to_stop();
+    int listening_port = Poco::NumberParser::parse(_command_port);
+    int number_start = 0;
+    int number_end = 0;
+    std::vector<std::string> v = absl::StrSplit(_number_range, '-');
+    if (v.size() > 1) {
+      number_start = Poco::NumberParser::parse(v[0]);
+      number_end = Poco::NumberParser::parse(v[1]);
+    } else if (!v.empty()) {
+      number_start = Poco::NumberParser::parse(v[0]);
+      number_end = number_start;
     }
+
+    std::unique_ptr<ProcessRunnerServiceRun> process_runner =
+        std::make_unique<ProcessRunnerServiceRun>(get_application_installation_folder(), _base_config_directory_path,
+                                                  _base_data_directory_path, listening_port, number_start, number_end);
+    waitForTerminationRequest();
+    process_runner->signal_to_stop();
     RAY_LOG_INF << "Stopped";
     return Application::EXIT_OK;
   }

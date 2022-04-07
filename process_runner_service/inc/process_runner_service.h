@@ -10,8 +10,8 @@
 #include <grpc/grpc.h>
 #include <map>
 #include <memory>
-#include <thread>
 #include <mutex>
+#include <thread>
 
 #include "protobuf_helper.h"
 
@@ -22,11 +22,14 @@ private:
   std::mutex _process_runner_last_keep_alive_map_mtx;
   std::map<std::size_t, std::unique_ptr<ProcessRunner>> process_runner_map;
   std::map<std::size_t, std::chrono::high_resolution_clock::time_point> _process_runner_last_keep_alive_map;
+  std::map<int, std::chrono::high_resolution_clock::time_point> _blocked_number_keep_block_map;
   std::string _application_installation_directory;
   std::string _config_directory;
   std::string _data_directory;
   std::atomic_bool _do_shutdown{false};
   std::unique_ptr<std::thread> _thread;
+  int _number_start;
+  int _number_end;
   /**
    * This function runs in a different thread and monitors if the IsRunning called at regular interval
    * If the keep alive is not called then the process_runner is removed from the list
@@ -39,10 +42,11 @@ private:
   std::optional<int> _get_id(std::size_t key);
   std::optional<std::string> _get_composite_command(std::size_t key);
   std::optional<std::string> _get_initial_directory(std::size_t key);
+  int get_usable_number();
 
 public:
   ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
-                       std::string data_directory);
+                       std::string data_directory, int number_start, int number_end);
   ~ProcessRunnerService();
 
   ::grpc::Status
@@ -79,6 +83,9 @@ public:
   ::grpc::Status GetInitialDirectory(::grpc::ServerContext* context,
                                      const data_models::GetInitialDirectoryRequest* request,
                                      data_models::GetInitialDirectoryResponse* response) override;
+
+  ::grpc::Status GetNextNumber(::grpc::ServerContext* context, const data_models::GetNextNumberRequest* request,
+                               data_models::GetNextNumberResponse* response) override;
 };
 
 #endif // process_runner_service_h

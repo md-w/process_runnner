@@ -132,7 +132,30 @@
                 "cwd": "${workspaceFolder}",
                 "environment": [],
                 "console": "integratedTerminal",
-            }
+            },
+            "linux": {
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/build/entry_point_client/entry_point_client",
+                "cwd": "${workspaceFolder}",
+                "args": [],
+                "stopAtEntry": false,
+                "console": "integratedTerminal",
+                "MIMode": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": false
+                    },
+                    {
+                        "description": "Set Disassembly Flavor to Intel",
+                        "text": "-gdb-set disassembly-flavor intel",
+                        "ignoreFailures": false
+                    }
+                ],
+                "miDebuggerPath": "/usr/bin/gdb"
+            },
         }
     ]
 }
