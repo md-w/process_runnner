@@ -20,7 +20,7 @@ public:
 	elapsed_time(double &processingTickTime, const std::string &moduleName)
 		: _processingTickTime(processingTickTime), _moduleName(moduleName)
 	{
-		
+
 	}
 
 	~elapsed_time()
@@ -33,8 +33,8 @@ public:
 		memset(log_buff, 0, LOG_BUFF_MAX_LEN);
 		snprintf (log_buff, LOG_BUFF_MAX_LEN, "time taken by module: %s : %lld micros.", _moduleName.data(), total_duration);
 		vtpl::vl_log(vtpl::en_vlogger_level::vl_debug, (char*)LOG_FORMAT(LOGGER), log_buff);
-		
-		
+
+
 	}
 };
 #endif // !elapsed_time_h

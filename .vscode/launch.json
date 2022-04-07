@@ -74,7 +74,7 @@
                     },
                     {
                         "name": "HLS_PORT",
-                        "value": "8443"
+                        "value": "443"
                     },
                     {
                         "name": "PUBLIC_DNS_RTMP",
@@ -94,7 +94,7 @@
                     },
                     {
                         "name": "DATA_ROOT",
-                        "value": "/data/1"
+                        "value": "./data/1"
                     }
                 ],
                 "MIMode": "gdb",
