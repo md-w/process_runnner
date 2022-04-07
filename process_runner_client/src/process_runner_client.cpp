@@ -76,3 +76,4 @@ int ProcessRunnerClient::get_last_exit_code() { return _service_caller->get_last
 int ProcessRunnerClient::get_id() { return _service_caller->get_id(_key); }
 std::string ProcessRunnerClient::get_composite_command() { return _service_caller->get_composite_command(_key); }
 std::string ProcessRunnerClient::get_initial_directory() { return _service_caller->get_initial_directory(_key); }
+int ProcessRunnerClient::get_number() { return _service_caller->get_next_number(); }

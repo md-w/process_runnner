@@ -44,6 +44,7 @@ public:
   bool is_running();
   int get_last_exit_code();
   int get_id();
+  int get_number();
   std::string get_composite_command();
   std::string get_initial_directory();
 };

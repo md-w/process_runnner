@@ -25,6 +25,7 @@ public:
   virtual bool is_running() = 0;
   virtual int get_last_exit_code() = 0;
   virtual int get_id() = 0;
+  virtual int get_number() = 0;
   virtual std::string get_composite_command() = 0;
   virtual std::string get_initial_directory() = 0;
   virtual ~IProcessRunner() = default;
