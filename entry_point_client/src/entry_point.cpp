@@ -167,9 +167,9 @@ public:
     RAY_LOG_INF << "Started";
     load_first_configuration();
     if (true) {
-      std::string host = "127.0.0.1:50051";
+      std::string host = "127.0.0.1:8787";
 
-      //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@192.168.0.35/media/video1 -o
+      //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@172.16.0.59/media/video1 -o
       /// workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from:
       /// workspaces/vtpl_agent_2022/build/vtpl_agent/
       std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
@@ -181,7 +181,7 @@ public:
           process_runner_service_caller->get_data_directory(), "4dc75/98c9a/recording_clip/major");
       std::vector<std::string> args;
       args.emplace_back("-i");
-      args.emplace_back("rtsp://admin:AdmiN1234@192.168.0.35/media/video1");
+      args.emplace_back("rtsp://admin:AdmiN1234@172.16.0.59/media/video1");
       args.emplace_back("-o");
       args.emplace_back(recording_dir);
       ProcessRunnerClient process_runner_client(command, args, process_runner_service_caller);
@@ -191,11 +191,11 @@ public:
       std::unique_ptr<data_models::IProcessRunner> _client_live_process_runner;
       std::vector<std::string> client_live_process_runner_args;
       client_live_process_runner_args.emplace_back("-i");
-      std::string composed_url = vtpl::utilities::compose_url("rtsp://192.168.0.35/media/video1", "admin", "AdmiN1234");
+      std::string composed_url = vtpl::utilities::compose_url("rtsp://172.16.0.59/media/video1", "admin", "AdmiN1234");
       client_live_process_runner_args.emplace_back(composed_url);
       client_live_process_runner_args.emplace_back("-o");
       int rtmp_port = 9001;
-      std::string rtmp_host = "192.168.1.115";
+      std::string rtmp_host = "172.16.2.115";
       client_live_process_runner_args.emplace_back(fmt::format("rtmp://{}:{}", rtmp_host, rtmp_port));
       _client_live_process_runner = std::make_unique<ProcessRunner>(
           vtpl::utilities::merge_directories(get_application_installation_folder(), "media_converter.exe"),

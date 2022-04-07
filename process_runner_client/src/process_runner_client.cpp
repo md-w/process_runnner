@@ -56,7 +56,7 @@ void ProcessRunnerClient::run()
       run_process();
       RAY_LOG_INF << "Process Started for " << get_composite_command() << " From: " << get_initial_directory();
       while (!_do_shutdown) {
-        int exit_code = get_last_exit_code();
+        int exit_code = 0; //get_last_exit_code();
         if (exit_code != 0) {
           RAY_LOG_INF << "Process returned with:: " << exit_code;
         }
