@@ -121,7 +121,10 @@ message GetDataDirectoryResponse
   string value = 3;
 }
 
-message GetNextNumberRequest {}
+message GetNextNumberRequest
+{
+  string key = 1;
+}
 
 message GetNextNumberResponse
 {

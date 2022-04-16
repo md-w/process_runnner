@@ -3,7 +3,7 @@
 # *****************************************************
 
 find_package(gRPC REQUIRED)
-
+find_package(Poco REQUIRED Util)
 add_library(process_runner_service
     src/process_runner_service.cpp
     src/process_runner_service_run.cpp
@@ -19,6 +19,7 @@ target_link_libraries(process_runner_service
     PRIVATE vutilities
     PRIVATE data_models
     PRIVATE process_runner
+    PRIVATE Poco::Util
 )
 
 set_property(TARGET process_runner_service PROPERTY

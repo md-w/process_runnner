@@ -4,6 +4,7 @@
 
 #include "process_runner_service.h"
 #include "logging.h"
+#include <Poco/Util/IniFileConfiguration.h>
 
 ProcessRunnerService::ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
                                            std::string data_directory, int number_start, int number_end)
@@ -85,6 +86,16 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
   }
   return ret_val;
 }
+
+int ProcessRunnerService::get_usable_number(const std::string& key)
+{
+
+  std::string file_name = "key_number_map.txt";
+  Poco::AutoPtr<Poco::Util::IniFileConfiguration> config;
+
+  return 0;
+}
+
 int ProcessRunnerService::get_usable_number()
 {
   int ret_val = 0;

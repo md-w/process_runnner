@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <thread>
 
 #include "protobuf_helper.h"
@@ -44,6 +45,7 @@ private:
   std::optional<std::string> _get_composite_command(std::size_t key);
   std::optional<std::string> _get_initial_directory(std::size_t key);
   int get_usable_number();
+  int get_usable_number(const std::string& key);
 
 public:
   ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
