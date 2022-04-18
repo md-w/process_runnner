@@ -45,11 +45,9 @@ private:
   std::optional<int> _get_id(std::size_t key);
   std::optional<std::string> _get_composite_command(std::size_t key);
   std::optional<std::string> _get_initial_directory(std::size_t key);
-  int get_usable_number();
+  // int get_usable_number();
 
 public:
-  static int get_usable_number(const std::string& key, int start, int end, const std::string& file_path);
-
   ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
                        std::string data_directory, int number_start, int number_end);
   ~ProcessRunnerService();

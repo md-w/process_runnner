@@ -10,6 +10,7 @@ target_link_libraries(tests
     PRIVATE Catch2::Catch2WithMain
     PRIVATE data_models
     PRIVATE process_runner_service
+    PRIVATE vutilities
 )
 
 set_property(TARGET tests PROPERTY

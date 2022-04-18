@@ -2,16 +2,25 @@
 //    Copyright 2022 Videonetics Technology Pvt Ltd
 // *****************************************************
 
-#include <Poco/Environment.h>
 #include <Poco/File.h>
+#include <Poco/NumberFormatter.h>
+#include <Poco/Path.h>
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>
 #include <Poco/Util/JSONConfiguration.h>
+#include <absl/strings/escaping.h>
 #include <absl/strings/match.h>
+#include <absl/strings/str_replace.h>
+#include <absl/strings/str_split.h>
 #include <absl/strings/string_view.h>
+#include <algorithm>
+#include <chrono>
+#include <fstream>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <sys/stat.h>
+#include <vector>
 
 #ifdef WIN32
 #include <filesystem>
@@ -27,10 +36,6 @@ namespace filesystem = std::filesystem;
 namespace filesystem = std::experimental::filesystem;
 #endif
 #endif
-
-#include <absl/strings/escaping.h>
-#include <algorithm>
-#include <fstream>
 
 #include "utilities.h"
 
@@ -375,6 +380,7 @@ std::string vtpl::utilities::compose_url(const std::string& url, const std::stri
 
   return url;
 }
+
 std::string vtpl::utilities::get_environment_value(const std::string& value, const std::string& default_value)
 {
 
@@ -386,6 +392,9 @@ std::string vtpl::utilities::get_environment_value(const std::string& value, con
 
 int vtpl::utilities::get_usable_number(const std::string& key, int start, int end, const std::string& file_path)
 {
+  static std::mutex _mutex;
+  std::lock_guard<std::mutex> lock(_mutex);
+
   int ret = 0;
   int config_file_save_counter = 0;
 
@@ -428,3 +437,126 @@ int vtpl::utilities::get_usable_number(const std::string& key, int start, int en
 
   return ret;
 }
+
+std::tuple<int64_t, int64_t, int>
+vtpl::utilities::get_capacity_available_percentage_space_info(const std::string& dir_path)
+{
+  std::error_code ec;
+  const filesystem::space_info si = filesystem::space(dir_path, ec);
+  int percentage = static_cast<int>((si.capacity - si.available) * 100 / si.capacity);
+  return {static_cast<std::intmax_t>(si.capacity), static_cast<std::intmax_t>(si.available), percentage};
+}
+
+std::string vtpl::utilities::get_first_two_letters_in_upper_case(const std::string& str)
+{
+  if (str.empty()) {
+    return std::string{};
+  }
+
+  std::string ret = str.substr(0, 2);
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
+
+  return ret;
+}
+
+bool vtpl::utilities::copy_file(const std::string& src_path, const std::string& dst_dir)
+{
+  if (src_path.empty()) {
+    return false;
+  }
+  if (dst_dir.empty()) {
+    return false;
+  }
+
+  if (!vtpl::utilities::is_regular_file_exists(src_path)) {
+    return false;
+  }
+  if (!vtpl::utilities::is_directory_exists(dst_dir)) {
+    vtpl::utilities::create_directories(dst_dir);
+  }
+  try {
+    filesystem::copy(src_path, dst_dir);
+    return true;
+  } catch (const std::exception& ex) {
+    std::cerr << "Unable to copy [" << src_path << "] to [" << dst_dir << "]. Cause : " << ex.what() << std::endl;
+  }
+  return false;
+}
+
+std::string vtpl::utilities::get_absolute_path(const std::string& path)
+{
+  if (path.empty()) {
+    return path;
+  }
+
+  Poco::Path poco_path(path);
+  if (poco_path.isRelative()) {
+    Poco::Path path_ret(Poco::Path::current());
+    path_ret.append(poco_path.toString());
+    return path_ret.toString();
+  }
+  return path;
+}
+
+int64_t vtpl::utilities::get_current_time_in_millis()
+{
+  return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+      .count();
+}
+
+std::tuple<std::string, std::string> vtpl::utilities::parse_user_pass(const std::string& url)
+{ // "rtsp://adm@@@in:Adm@@@@@@iN1234@192.168.0.44:554/rtsph2641080p"
+  std::string user{};
+  std::string pass{};
+
+  size_t begin = url.find_first_of("://");
+  size_t end = url.find_last_of('@');
+
+  if (begin != std::string::npos && end != std::string::npos) {
+    size_t t = begin + std::string{"://"}.length();
+    std::string username_pass = url.substr(t, end - t);
+    std::vector<std::string> v = absl::StrSplit(username_pass, ':');
+    if (v.size() == 2) {
+      user = v[0];
+      pass = v[1];
+    }
+  }
+  return {user, pass};
+}
+
+// std::string vtpl::utilities::form_write_path(std::string base_path, std::string customer_id,
+//                                              std::string device_unique_id, vtpl::file_type* p_file_type,
+//                                              vtpl::general_stream_type* p_stream_type, long long timestamp)
+// {
+//   std::string dir_path_str;
+//   if (base_path.length() > 0)
+//     dir_path_str = base_path;
+//   if (customer_id.length() > 0)
+//     dir_path_str = vtpl::utilities::merge_directories(dir_path_str, customer_id);
+//   if (device_unique_id.length() > 0)
+//     dir_path_str = vtpl::utilities::merge_directories(dir_path_str, device_unique_id);
+//   if (p_file_type != NULL) {
+//     std::string tmp_file_type_get = p_file_type->get();
+//     if (!tmp_file_type_get.empty() && tmp_file_type_get.length() > 0) {
+//       dir_path_str = vtpl::utilities::merge_directories(dir_path_str, tmp_file_type_get);
+//     }
+//   }
+//   if (p_stream_type != NULL) {
+//     if (p_stream_type->get_value() != vtpl::general_stream_type::values::none) {
+//       dir_path_str =
+//           vtpl::utilities::merge_directories(dir_path_str,
+//           vtpl::general_stream_type::get(p_stream_type->get_value()));
+//     }
+//   }
+//   if (timestamp > 0) {
+//     time_t t = timestamp / 1000;
+//     tm* gmtm = gmtime(&t);
+//     dir_path_str =
+//         vtpl::utilities::merge_directories(dir_path_str, Poco::NumberFormatter::format0(gmtm->tm_year + 1900, 4));
+//     dir_path_str =
+//         vtpl::utilities::merge_directories(dir_path_str, Poco::NumberFormatter::format0(gmtm->tm_mon + 1, 2));
+//     dir_path_str = vtpl::utilities::merge_directories(dir_path_str, Poco::NumberFormatter::format0(gmtm->tm_mday,
+//     2));
+//   }
+//   return dir_path_str;
+// }

@@ -5,9 +5,11 @@
 #pragma once
 #ifndef utilities_h
 #define utilities_h
+
 #include <map>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace vtpl
@@ -45,8 +47,17 @@ std::string change_extension(const std::string& str, const std::string& ext);
 std::string compose_url(const std::string& url, const std::string& user, const std::string& pass);
 std::string get_environment_value(const std::string& value, const std::string& default_value);
 int get_usable_number(const std::string& key, int start, int end, const std::string& file_path);
-} // namespace utilities
+std::tuple<int64_t, int64_t, int> get_capacity_available_percentage_space_info(const std::string& dir_path);
+std::string get_first_two_letters_in_upper_case(const std::string& str);
+// std::string form_write_path(std::string base_path, std::string customer_id, std::string device_unique_id,
+//                             vtpl::file_type* p_file_type, vtpl::general_stream_type* p_stream_type,
+//                             long long timestamp);
+bool copy_file(const std::string& src_path, const std::string& dst_dir);
+std::string get_absolute_path(const std::string& path);
+int64_t get_current_time_in_millis();
+std::tuple<std::string, std::string> parse_user_pass(const std::string& url);
 
+} // namespace utilities
 } // namespace vtpl
 
 #endif // utilities_h

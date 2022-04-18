@@ -89,41 +89,37 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
   return ret_val;
 }
 
-int ProcessRunnerService::get_usable_number(const std::string& key, int start, int end, const std::string& file_path)
-{
-  return vtpl::utilities::get_usable_number(key, start, end, file_path);
-}
+// int ProcessRunnerService::get_usable_number()
+// {
+//   int ret_val = 0;
+//   bool is_usable = false;
+//   for (int number = _number_start; number <= _number_end; number++) {
+//     {
+//       std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
+//       if (_blocked_number_keep_block_map.find(number) == _blocked_number_keep_block_map.end()) {
+//         is_usable = true;
+//       }
+//     }
+//     if (is_usable) {
+//       std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
 
-int ProcessRunnerService::get_usable_number()
-{
-  int ret_val = 0;
-  bool is_usable = false;
-  for (int number = _number_start; number <= _number_end; number++) {
-    {
-      std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
-      if (_blocked_number_keep_block_map.find(number) == _blocked_number_keep_block_map.end()) {
-        is_usable = true;
-      }
-    }
-    if (is_usable) {
-      std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
+//       for (auto&& v : process_runner_map) {
+//         if (v.second->get_number() == number) {
+//           is_usable = false;
+//           break;
+//         }
+//       }
+//     }
+//     if (is_usable) {
+//       std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
+//       _blocked_number_keep_block_map.emplace(std::pair(number, std::chrono::high_resolution_clock::now()));
+//       ret_val = number;
+//       break;
+//     }
+//   }
+//   return ret_val;
+// }
 
-      for (auto&& v : process_runner_map) {
-        if (v.second->get_number() == number) {
-          is_usable = false;
-          break;
-        }
-      }
-    }
-    if (is_usable) {
-      std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
-      _blocked_number_keep_block_map.emplace(std::pair(number, std::chrono::high_resolution_clock::now()));
-      ret_val = number;
-      break;
-    }
-  }
-  return ret_val;
-}
 ::grpc::Status ProcessRunnerService::RunProcess(::grpc::ServerContext* /*context*/,
                                                 const data_models::RunProcessRequest* request,
                                                 data_models::RunProcessResponse* response)
@@ -387,11 +383,13 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
 }
 
 ::grpc::Status ProcessRunnerService::GetNextNumber(::grpc::ServerContext* /*context*/,
-                                                   const data_models::GetNextNumberRequest* /*request*/,
+                                                   const data_models::GetNextNumberRequest* request,
                                                    data_models::GetNextNumberResponse* response)
 {
   response->set_error_code(0);
-  int number = get_usable_number();
+  const std::string& key = request->key();
+  int number = vtpl::utilities::get_usable_number(
+      key, _number_start, _number_end, vtpl::utilities::merge_directories(_config_directory, "uuid_port_map.json"));
   RAY_LOG_INF << "Returning usable number as: " << number;
   response->set_value(number);
   return ::grpc::Status::OK;
