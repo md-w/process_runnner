@@ -28,7 +28,7 @@ RUN chmod +x "media_converter"
 RUN chown -R $USER_UID:$USER_GID /home/$USERNAME
 USER $USERNAME
 
-ENV COMMAND_PORT 8787
-EXPOSE ${COMMAND_PORT}
+# ENV COMMAND_PORT 8787
+# EXPOSE ${COMMAND_PORT}
 
 CMD [ "./entry_point_server" ]

@@ -105,8 +105,15 @@ int ProcessRunnerService::get_usable_number(const std::string& key, int start, i
   try {
     std::vector<std::string> total_keys(end - start + 1);
     std::generate(total_keys.begin(), total_keys.end(), [&] { return Poco::NumberFormatter::format(start++); });
+    std::vector<std::string> temp_keys;
+    config->keys(temp_keys);
     std::vector<std::string> used_keys;
-    config->keys(used_keys);
+    for (auto &&key : temp_keys)
+    {
+       int v = config->getInt(key);
+       used_keys.push_back(std::to_string(v));
+    }
+
     std::vector<std::string> available_keys;
     std::set_difference(total_keys.begin(), total_keys.end(), used_keys.begin(), used_keys.end(),
                         std::inserter(available_keys, available_keys.begin()));
