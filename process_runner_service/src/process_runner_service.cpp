@@ -99,12 +99,12 @@ int ProcessRunnerService::get_usable_number(const std::string& key)
   } else {
     config_file_save_counter++;
   }
-  std::vector<int> usable_port =
   // std::vector<std::string> keys;
   // config->keys(keys);
-  // if (!config->has(key)) {
+  if (!config->has(key)) {
 
-  // }
+  }
+
   if (config_file_save_counter > 0) {
     std::ofstream out_file = std::ofstream(file_name);
     config->save(out_file);
