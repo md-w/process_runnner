@@ -1,10 +1,12 @@
 // *****************************************************
 //    Copyright 2022 Videonetics Technology Pvt Ltd
 // *****************************************************
+#include <Poco/Util/JSONConfiguration.h>
+#include <fstream>
 
-#include "process_runner_service.h"
 #include "logging.h"
-#include <Poco/Util/IniFileConfiguration.h>
+#include "process_runner_service.h"
+#include "utilities.h"
 
 ProcessRunnerService::ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
                                            std::string data_directory, int number_start, int number_end)
@@ -89,10 +91,24 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
 
 int ProcessRunnerService::get_usable_number(const std::string& key)
 {
+  int config_file_save_counter = 0;
+  std::string file_name = vtpl::utilities::merge_directories(_config_directory, "key_file_map.json");
+  Poco::AutoPtr<Poco::Util::JSONConfiguration> config;
+  if (vtpl::utilities::is_regular_file_exists(file_name)) {
+    config->load(file_name);
+  } else {
+    config_file_save_counter++;
+  }
+  std::vector<int> usable_port =
+  // std::vector<std::string> keys;
+  // config->keys(keys);
+  // if (!config->has(key)) {
 
-  std::string file_name = "key_number_map.txt";
-  Poco::AutoPtr<Poco::Util::IniFileConfiguration> config;
-
+  // }
+  if (config_file_save_counter > 0) {
+    std::ofstream out_file = std::ofstream(file_name);
+    config->save(out_file);
+  }
   return 0;
 }
 

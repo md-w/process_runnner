@@ -79,7 +79,6 @@ protected:
     load_configuration();
     _name_of_app = config().getString("application.baseName");
     std::string s = vtpl::utilities::end_with_directory_seperator(_base_log_directory_path).str();
-    s = ""; // FIXME(Monotosh)
     ::ray::RayLog::StartRayLog(_name_of_app, ::ray::RayLogLevel::INFO, s, false);
   }
 

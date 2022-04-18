@@ -14,6 +14,7 @@
 #include <optional>
 #include <thread>
 
+#include "data_models_process_runner.h"
 #include "protobuf_helper.h"
 
 class ProcessRunnerService final : public data_models::ProcessRunner::Service
@@ -22,7 +23,7 @@ private:
   std::mutex _process_runner_map_mtx;
   std::mutex _process_runner_last_keep_alive_map_mtx;
   std::mutex _blocked_number_keep_block_map_mtx;
-  std::map<std::size_t, std::unique_ptr<ProcessRunner>> process_runner_map;
+  std::map<std::size_t, std::unique_ptr<data_models::IProcessRunner>> process_runner_map;
   std::map<std::size_t, std::chrono::high_resolution_clock::time_point> _process_runner_last_keep_alive_map;
   std::map<int, std::chrono::high_resolution_clock::time_point> _blocked_number_keep_block_map;
   std::string _application_installation_directory;
@@ -45,9 +46,10 @@ private:
   std::optional<std::string> _get_composite_command(std::size_t key);
   std::optional<std::string> _get_initial_directory(std::size_t key);
   int get_usable_number();
-  int get_usable_number(const std::string& key);
 
 public:
+  int get_usable_number(const std::string& key);
+
   ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
                        std::string data_directory, int number_start, int number_end);
   ~ProcessRunnerService();
