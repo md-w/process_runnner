@@ -32,7 +32,11 @@ TEST_CASE("get_usable_number", "[ProcessRunnerService]")
   int number_start = 9101;
   int number_end = 9111;
   std::string file_name = "key_file_map.json";
-  std::unique_ptr<ProcessRunnerService> process_runner_service = std::make_unique<ProcessRunnerService>(
-      application_installation_directory, config_directory, data_directory, number_start, number_end);
-  REQUIRE(process_runner_service->get_usable_number("1", number_start, number_end, file_name) == 9101);
+  // std::unique_ptr<ProcessRunnerService> process_runner_service = std::make_unique<ProcessRunnerService>(
+  //     application_installation_directory, config_directory, data_directory, number_start, number_end);
+  REQUIRE(ProcessRunnerService::get_usable_number("1", number_start, number_end, file_name) == 9101);
+  REQUIRE(ProcessRunnerService::get_usable_number("2", number_start, number_end, file_name) == 9102);
+  REQUIRE(ProcessRunnerService::get_usable_number("3", number_start, number_end, file_name) == 9103);
+  REQUIRE(ProcessRunnerService::get_usable_number("4", number_start, number_end, file_name) == 9104);
+  REQUIRE(ProcessRunnerService::get_usable_number("3", number_start, number_end, file_name) == 9103);
 }

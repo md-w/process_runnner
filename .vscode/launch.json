@@ -171,8 +171,8 @@
             "windows": {
                 "type": "cppvsdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/build/tests/tests",
-                "args": [],
+                "program": "${workspaceFolder}/build/tests/Debug/tests.exe",
+                "args": ["get_usable_number"],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",
                 "environment": [],

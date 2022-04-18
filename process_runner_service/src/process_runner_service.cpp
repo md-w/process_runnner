@@ -95,7 +95,7 @@ int ProcessRunnerService::get_usable_number(const std::string& key, int start, i
 {
   int ret = 0;
   int config_file_save_counter = 0;
-  std::string file_path = vtpl::utilities::merge_directories(_config_directory, file_name);
+  std::string file_path = file_name;
   Poco::AutoPtr<Poco::Util::JSONConfiguration> config = new Poco::Util::JSONConfiguration();
   if (vtpl::utilities::is_regular_file_exists(file_path)) {
     config->load(file_path);
