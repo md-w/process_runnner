@@ -157,6 +157,51 @@
                 ],
                 "miDebuggerPath": "/usr/bin/gdb"
             },
+        },
+        {
+            "name": "tests",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tests/tests",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "windows": {
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/build/tests/tests",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "console": "integratedTerminal",
+            },
+            "linux": {
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/build/tests/tests",
+                "cwd": "${workspaceFolder}",
+                "args": ["get_usable_number"],
+                "stopAtEntry": false,
+                "console": "integratedTerminal",
+                "environment": [],
+                "MIMode": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": false
+                    },
+                    {
+                        "description": "Set Disassembly Flavor to Intel",
+                        "text": "-gdb-set disassembly-flavor intel",
+                        "ignoreFailures": false
+                    }
+                ],
+                "miDebuggerPath": "/usr/bin/gdb"
+            },
         }
     ]
 }

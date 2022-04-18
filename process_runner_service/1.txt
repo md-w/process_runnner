@@ -1,0 +1,32 @@
+--job 232 001 https://streaming.intellicam.ai/live/hls/16924_HLS_SERVER_MI/index.m3u8 \
+    --job 201 002 https://streaming.intellicam.ai/live/hls/aeddc_HLS_SERVER_MI/index.m3u8 \
+    --job 202 003 https://streaming.intellicam.ai/live/hls/FABE6_HLS_SERVER_MI/index.m3u8 \
+    --job 203 004 https://streaming.intellicam.ai/live/hls/DD86E_HLS_SERVER_MI/index.m3u8 \
+    --job 221 005 https://streaming.intellicam.ai/live/hls/FDBA3_HLS_SERVER_MI/index.m3u8 \
+    --job 207 006 https://streaming.intellicam.ai/live/hls/9FCD9_HLS_SERVER_MI/index.m3u8 \
+    --job 208 007 https://streaming.intellicam.ai/live/hls/7F012_HLS_SERVER_MI/index.m3u8 \
+    --job 232 008 https://streaming.intellicam.ai/live/hls/61857_HLS_SERVER_MI/index.m3u8 \
+    --job 355 009 https://streaming.intellicam.ai/live/hls/346A2_HLS_SERVER_MI/index.m3u8 \
+    --job 356 010 https://streaming.intellicam.ai/live/hls/1305B_HLS_SERVER_MI/index.m3u8
+
+
+--job 232 001 https://streaming.intellicam.ai/live/hls/16924_HLS_SERVER_MI/index.m3u8 \
+    --job 201 002 https://streaming.intellicam.ai/live/hls/aeddc_HLS_SERVER_MI/index.m3u8 \
+    --job 202 003 https://streaming.intellicam.ai/live/hls/FABE6_HLS_SERVER_MI/index.m3u8 \
+    --job 203 004 https://streaming.intellicam.ai/live/hls/DD86E_HLS_SERVER_MI/index.m3u8 \
+    --job 221 005 https://streaming.intellicam.ai/live/hls/FDBA3_HLS_SERVER_MI/index.m3u8 \
+    --job 207 006 https://streaming.intellicam.ai/live/hls/9FCD9_HLS_SERVER_MI/index.m3u8 \
+    --job 208 007 https://streaming.intellicam.ai/live/hls/7F012_HLS_SERVER_MI/index.m3u8 \
+    --job 232 008 https://streaming.intellicam.ai/live/hls/61857_HLS_SERVER_MI/index.m3u8 \
+    --job 355 009 https://streaming.intellicam.ai/live/hls/346A2_HLS_SERVER_MI/index.m3u8 \
+    --job 356 010 https://streaming.intellicam.ai/live/hls/1305B_HLS_SERVER_MI/index.m3u8
+--job 232 001 https://streaming.intellicam.ai/live/hls/16924_HLS_SERVER_MI/index.m3u8 \
+--job 201 002 https://streaming.intellicam.ai/live/hls/aeddc_HLS_SERVER_MI/index.m3u8 \
+--job 202 003 https://streaming.intellicam.ai/live/hls/FABE6_HLS_SERVER_MI/index.m3u8 \
+--job 203 004 https://streaming.intellicam.ai/live/hls/DD86E_HLS_SERVER_MI/index.m3u8 \
+--job 221 005 https://streaming.intellicam.ai/live/hls/FDBA3_HLS_SERVER_MI/index.m3u8 \
+--job 207 006 https://streaming.intellicam.ai/live/hls/9FCD9_HLS_SERVER_MI/index.m3u8 \
+--job 208 007 https://streaming.intellicam.ai/live/hls/7F012_HLS_SERVER_MI/index.m3u8 \
+--job 232 008 https://streaming.intellicam.ai/live/hls/61857_HLS_SERVER_MI/index.m3u8 \
+--job 355 009 https://streaming.intellicam.ai/live/hls/346A2_HLS_SERVER_MI/index.m3u8 \
+--job 356 010 https://streaming.intellicam.ai/live/hls/1305B_HLS_SERVER_MI/index.m3u8

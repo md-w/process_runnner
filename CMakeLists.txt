@@ -25,10 +25,10 @@ if(Git_FOUND)
     message(STATUS gbr: ${GIT_COMMIT_BRANCH})
     #add_definitions(-DGIT_COMMIT_BRANCH="${GIT_COMMIT_BRANCH}")
 endif() #git
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-set(CMAKE_CXX_CLANG_TIDY
-    clang-tidy;)
-endif()
+# if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+# set(CMAKE_CXX_CLANG_TIDY
+#     clang-tidy;)
+# endif()
 
 set(APPLICATION_NAME "process_runner")
 set(APPLICATION_GUID "0tDe3o5UiUODZSmfmwl32Q")
