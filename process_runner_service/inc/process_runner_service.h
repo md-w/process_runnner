@@ -48,7 +48,7 @@ private:
   int get_usable_number();
 
 public:
-  static int get_usable_number(const std::string& key, int start, int end, const std::string& file_name);
+  static int get_usable_number(const std::string& key, int start, int end, const std::string& file_path);
 
   ProcessRunnerService(std::string application_installation_directory, std::string config_directory,
                        std::string data_directory, int number_start, int number_end);

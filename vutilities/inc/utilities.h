@@ -44,6 +44,7 @@ std::string shorten_string(const std::string& str);
 std::string change_extension(const std::string& str, const std::string& ext);
 std::string compose_url(const std::string& url, const std::string& user, const std::string& pass);
 std::string get_environment_value(const std::string& value, const std::string& default_value);
+int get_usable_number(const std::string& key, int start, int end, const std::string& file_path);
 } // namespace utilities
 
 } // namespace vtpl

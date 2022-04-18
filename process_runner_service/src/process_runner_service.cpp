@@ -1,8 +1,6 @@
 // *****************************************************
 //    Copyright 2022 Videonetics Technology Pvt Ltd
 // *****************************************************
-#include <Poco/NumberFormatter.h>
-#include <Poco/Util/JSONConfiguration.h>
 #include <algorithm>
 #include <fstream>
 
@@ -91,51 +89,9 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
   return ret_val;
 }
 
-int ProcessRunnerService::get_usable_number(const std::string& key, int start, int end, const std::string& file_name)
+int ProcessRunnerService::get_usable_number(const std::string& key, int start, int end, const std::string& file_path)
 {
-  int ret = 0;
-  int config_file_save_counter = 0;
-  std::string file_path = file_name;
-  Poco::AutoPtr<Poco::Util::JSONConfiguration> config = new Poco::Util::JSONConfiguration();
-  if (vtpl::utilities::is_regular_file_exists(file_path)) {
-    config->load(file_path);
-  } else {
-    config_file_save_counter++;
-  }
-  try {
-    std::vector<std::string> total_keys(end - start + 1);
-    std::generate(total_keys.begin(), total_keys.end(), [&] { return Poco::NumberFormatter::format(start++); });
-    std::vector<std::string> temp_keys;
-    config->keys(temp_keys);
-    std::vector<std::string> used_keys;
-    for (auto &&key : temp_keys)
-    {
-       int v = config->getInt(key);
-       used_keys.push_back(std::to_string(v));
-    }
-
-    std::vector<std::string> available_keys;
-    std::set_difference(total_keys.begin(), total_keys.end(), used_keys.begin(), used_keys.end(),
-                        std::inserter(available_keys, available_keys.begin()));
-
-    if (!config->has(key)) {
-      int val = Poco::NumberParser::parse(available_keys.at(0));
-      available_keys.erase(available_keys.begin());
-      config->setInt(key, val);
-      config_file_save_counter++;
-    }
-    ret = config->getInt(key);
-  } catch (const std::exception& e) {
-    std::cerr << e.what() << '\n';
-  }
-
-  if (config_file_save_counter > 0) {
-    vtpl::utilities::create_directories_from_file_path(file_path);
-    std::ofstream out_file = std::ofstream(file_path);
-    config->save(out_file);
-    out_file.close();
-  }
-  return ret;
+  return vtpl::utilities::get_usable_number(key, start, end, file_path);
 }
 
 int ProcessRunnerService::get_usable_number()

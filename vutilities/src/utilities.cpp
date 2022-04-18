@@ -2,10 +2,11 @@
 //    Copyright 2022 Videonetics Technology Pvt Ltd
 // *****************************************************
 
-#include "Poco/Environment.h"
+#include <Poco/Environment.h>
 #include <Poco/File.h>
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>
+#include <Poco/Util/JSONConfiguration.h>
 #include <absl/strings/match.h>
 #include <absl/strings/string_view.h>
 #include <iostream>
@@ -89,7 +90,8 @@ std::string vtpl::utilities::create_directories_from_file_path(const std::string
     dir_path = file_path.substr(0, pos);
   }
   if (dir_path.empty()) {
-    throw std::runtime_error("Directory path is empty" + dir_path);
+    // throw std::runtime_error("Directory path is empty" + dir_path);
+    return std::string{};
   }
   if (vtpl::utilities::create_directories(dir_path)) {
     return dir_path;
@@ -380,4 +382,49 @@ std::string vtpl::utilities::get_environment_value(const std::string& value, con
     return Poco::Environment::get(value);
   }
   return default_value;
+}
+
+int vtpl::utilities::get_usable_number(const std::string& key, int start, int end, const std::string& file_path)
+{
+  int ret = 0;
+  int config_file_save_counter = 0;
+
+  Poco::AutoPtr<Poco::Util::JSONConfiguration> config = new Poco::Util::JSONConfiguration();
+  if (vtpl::utilities::is_regular_file_exists(file_path)) {
+    config->load(file_path);
+  } else {
+    config_file_save_counter++;
+  }
+  std::vector<int> total_keys(end - start + 1);
+  std::generate(total_keys.begin(), total_keys.end(), [&] { return start++; });
+  std::vector<std::string> temp_keys;
+  config->keys(temp_keys);
+  std::vector<int> used_keys;
+  for (auto&& key : temp_keys) {
+    int v = config->getInt(key);
+    used_keys.push_back(v);
+  }
+
+  std::vector<int> available_keys;
+  std::set_difference(total_keys.begin(), total_keys.end(), used_keys.begin(), used_keys.end(),
+                      std::inserter(available_keys, available_keys.begin()));
+  int val = -1;
+  if (!config->has(key)) {
+    if (!available_keys.empty()) {
+      val = available_keys.at(0);
+      available_keys.erase(available_keys.begin());
+      config->setInt(key, val);
+      config_file_save_counter++;
+    }
+  }
+  ret = config->getInt(key, val);
+
+  if (config_file_save_counter > 0) {
+    vtpl::utilities::create_directories_from_file_path(file_path);
+    std::ofstream out_file = std::ofstream(file_path);
+    config->save(out_file);
+    out_file.close();
+  }
+
+  return ret;
 }
