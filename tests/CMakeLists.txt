@@ -11,6 +11,7 @@ target_link_libraries(tests
     PRIVATE data_models
     PRIVATE process_runner_service
     PRIVATE vutilities
+    PRIVATE vlogger
 )
 
 set_property(TARGET tests PROPERTY

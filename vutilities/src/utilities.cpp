@@ -415,6 +415,7 @@ int vtpl::utilities::get_usable_number(const std::string& key, int start, int en
   }
 
   std::vector<int> available_keys;
+  std::sort(std::begin(used_keys), std::end(used_keys));
   std::set_difference(total_keys.begin(), total_keys.end(), used_keys.begin(), used_keys.end(),
                       std::inserter(available_keys, available_keys.begin()));
   int val = -1;
