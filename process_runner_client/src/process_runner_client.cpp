@@ -64,12 +64,12 @@ void ProcessRunnerClient::run()
                       vtpl::utilities::get_first_two_letters_in_upper_case(_stream_type)));
       std::string live_dir =
           vtpl::utilities::merge_directories(get_data_directory(), _live_stream_relative_url.value());
-      int rtmp_port = get_number();
+      _rtmp_port = get_number();
 
       std::vector<std::string> remote_args;
 
       remote_args.emplace_back("-i");
-      remote_args.emplace_back(fmt::format("rtmp://0.0.0.0:{}", rtmp_port));
+      remote_args.emplace_back(fmt::format("rtmp://0.0.0.0:{}", _rtmp_port));
       remote_args.emplace_back("-o");
       remote_args.emplace_back(live_dir);
       remote_args.emplace_back("-u");
@@ -85,7 +85,7 @@ void ProcessRunnerClient::run()
       std::string composed_url = vtpl::utilities::compose_url(_camera_url, _camera_user_name, _camera_password);
       client_process_runner_args.emplace_back(fmt::format("{}", composed_url));
       client_process_runner_args.emplace_back("-o");
-      client_process_runner_args.emplace_back(fmt::format("rtmp://{}:{}", _rtmp_server_host, rtmp_port));
+      client_process_runner_args.emplace_back(fmt::format("rtmp://{}:{}", _rtmp_server_host, _rtmp_port));
       client_process_runner_args.emplace_back("-u");
       client_process_runner_args.emplace_back(_camera_uuid);
 
@@ -127,3 +127,6 @@ std::string ProcessRunnerClient::get_application_installation_directory()
   return _service_caller->get_application_installation_directory();
 }
 std::string ProcessRunnerClient::get_data_directory() { return _service_caller->get_data_directory(); }
+
+std::optional<std::string> ProcessRunnerClient::get_live_stream_relative_url() { return _live_stream_relative_url; }
+std::optional<int> ProcessRunnerClient::get_rtmp_port() { return _rtmp_port; }

@@ -3,8 +3,8 @@
 // *****************************************************
 
 #pragma once
-#ifndef pipeline_remote_h
-#define pipeline_remote_h
+#ifndef process_runner_client_h
+#define process_runner_client_h
 #include <atomic>
 #include <future>
 #include <grpcpp/grpcpp.h>
@@ -31,6 +31,7 @@ private:
   std::string _camera_user_name;
   std::string _camera_password;
   std::string _stream_type;
+  int _rtmp_port{-1};
 
   std::size_t _key{0};
   std::atomic_bool _do_shutdown{false};
@@ -62,6 +63,9 @@ public:
   std::string get_initial_directory();
   std::string get_application_installation_directory();
   std::string get_data_directory();
+
+  std::optional<std::string> get_live_stream_relative_url();
+  std::optional<int> get_rtmp_port();
 };
 
-#endif // pipeline_remote_h
+#endif // process_runner_client_h
