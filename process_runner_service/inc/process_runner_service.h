@@ -22,10 +22,8 @@ class ProcessRunnerService final : public data_models::ProcessRunner::Service
 private:
   std::mutex _process_runner_map_mtx;
   std::mutex _process_runner_last_keep_alive_map_mtx;
-  std::mutex _blocked_number_keep_block_map_mtx;
   std::map<std::size_t, std::unique_ptr<data_models::IProcessRunner>> process_runner_map;
   std::map<std::size_t, std::chrono::high_resolution_clock::time_point> _process_runner_last_keep_alive_map;
-  std::map<int, std::chrono::high_resolution_clock::time_point> _blocked_number_keep_block_map;
   std::string _application_installation_directory;
   std::string _config_directory;
   std::string _data_directory;

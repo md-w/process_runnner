@@ -37,7 +37,7 @@ private:
   bool _is_thread_running{false};
   bool _is_already_shutting_down{false};
 
-  int _number;
+  std::string _unique_id;
 
   static std::string _get_current_directory();
   int _get_id();
@@ -54,7 +54,7 @@ public:
   static std::string get_config_directory();
   static std::string get_data_directory();
 
-  ProcessRunner(std::string command, std::vector<std::string> args, int number = 0,
+  ProcessRunner(std::string command, std::vector<std::string> args, std::string unique_id = "",
                 std::string initial_directory = ProcessRunner::initial_directory);
   virtual ~ProcessRunner();
   void signal_to_stop();

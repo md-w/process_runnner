@@ -183,43 +183,20 @@ public:
   int main(const ArgVec& /*args*/) final
   {
     RAY_LOG_INF << "Started";
-    if (true) {
-      std::string host = "127.0.0.1:8787";
 
-      //[/workspaces/vtpl_agent_2022/build/vtpl_agent/ffrecorder -i rtsp://admin:AdmiN1234@172.16.0.59/media/video1 -o
-      /// workspaces/vtpl_agent_2022/session/Data/4dc75/98c9a/recording_clip/major] from:
-      /// workspaces/vtpl_agent_2022/build/vtpl_agent/
-      std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-      std::shared_ptr<ProcessRunnerServiceCaller> process_runner_service_caller =
-          std::make_shared<ProcessRunnerServiceCaller>(channel);
-      std::string command = vtpl::utilities::merge_directories(
-          process_runner_service_caller->get_application_installation_directory(), "ffrecorder");
-      std::string recording_dir = vtpl::utilities::merge_directories(
-          process_runner_service_caller->get_data_directory(), "4dc75/98c9a/recording_clip/major");
-      int number = process_runner_service_caller->get_next_number();
-      std::vector<std::string> args;
-      args.emplace_back("-i");
-      args.emplace_back("rtsp://admin:AdmiN1234@172.16.0.59/media/video1");
-      args.emplace_back("-o");
-      args.emplace_back(recording_dir);
-      ProcessRunnerClient process_runner_client(command, args, number, process_runner_service_caller);
-      waitForTerminationRequest();
-    }
-    if (false) {
-      std::unique_ptr<data_models::IProcessRunner> _client_live_process_runner;
-      std::vector<std::string> client_live_process_runner_args;
-      client_live_process_runner_args.emplace_back("-i");
-      std::string composed_url = vtpl::utilities::compose_url("rtsp://172.16.0.59/media/video1", "admin", "AdmiN1234");
-      client_live_process_runner_args.emplace_back(composed_url);
-      client_live_process_runner_args.emplace_back("-o");
-      int rtmp_port = 9001;
-      std::string rtmp_host = "172.16.2.115";
-      client_live_process_runner_args.emplace_back(fmt::format("rtmp://{}:{}", rtmp_host, rtmp_port));
-      _client_live_process_runner = std::make_unique<ProcessRunner>(
-          vtpl::utilities::merge_directories(get_application_installation_folder(), "media_converter.exe"),
-          client_live_process_runner_args, 0, get_application_installation_folder());
-      waitForTerminationRequest();
-    }
+    std::string streaming_command_service_url{"127.0.0.1:8787"};
+    std::string rtmp_server_host{"127.0.0.1"};
+    std::string customer_id{"1234"};
+    std::string camera_uuid{"00010010-0001-1020-8000-48ea63798c9a"};
+    std::string camera_url{"rtsp://172.16.0.58/Streaming/Channels/101?transportmode=unicast&profile=Profile_1"};
+    std::string camera_user_name{"admin"};
+    std::string camera_password{"AdmiN1234"};
+    std::string stream_type{"major"};
+    std::unique_ptr<data_models::IProcessRunner> process_runner_client =
+        std::make_unique<ProcessRunnerClient>(get_application_installation_folder(), streaming_command_service_url,
+                                              rtmp_server_host, _base_data_directory_path, customer_id, camera_uuid,
+                                              camera_url, camera_user_name, camera_password, stream_type);
+    waitForTerminationRequest();
     RAY_LOG_INF << "Stopped";
     return Application::EXIT_OK;
   }

@@ -17,7 +17,7 @@ private:
 public:
   ProcessRunnerServiceCaller(std::shared_ptr<grpc::Channel> channel);
   ~ProcessRunnerServiceCaller() = default;
-  std::size_t run_process(std::string command, std::vector<std::string> args, int number);
+  std::size_t run_process(std::string command, std::vector<std::string> args, const std::string& unique_id);
   void signal_to_stop(std::size_t key);
   bool is_running(std::size_t key);
   int get_last_exit_code(std::size_t key);
@@ -27,7 +27,7 @@ public:
   std::string get_application_installation_directory();
   std::string get_config_directory();
   std::string get_data_directory();
-  int get_next_number();
+  int get_next_number(const std::string& key);
 };
 
 #endif // process_runner_service_caller_h

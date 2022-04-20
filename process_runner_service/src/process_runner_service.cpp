@@ -131,7 +131,7 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
   }
   std::size_t key = data_models::hash_value(process_runner_arguments);
   _set_keep_alive(key);
-  int number = request->number();
+  std::string unique_id = request->unique_id();
   bool is_found = false;
   {
     std::lock_guard<std::mutex> lock(_process_runner_map_mtx);
@@ -139,7 +139,7 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
       try {
         process_runner_map.emplace(
             std::pair(key, std::make_unique<ProcessRunner>(process_runner_arguments.command,
-                                                           process_runner_arguments.args, number)));
+                                                           process_runner_arguments.args, unique_id)));
 
       } catch (const std::exception& e) {
         RAY_LOG_ERR << "Error adding new process: " << key << " : " << e.what();
@@ -151,10 +151,10 @@ std::optional<std::string> ProcessRunnerService::_get_initial_directory(std::siz
     response->set_exit_code(process_runner_map.at(key)->get_last_exit_code());
   }
   {
-    std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
-    if (_blocked_number_keep_block_map.find(number) != _blocked_number_keep_block_map.end()) {
-      _blocked_number_keep_block_map.erase(number);
-    }
+    // std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
+    // if (_blocked_number_keep_block_map.find(number) != _blocked_number_keep_block_map.end()) {
+    //   _blocked_number_keep_block_map.erase(number);
+    // }
   }
   response->set_message("Started");
   response->set_key(key);
@@ -176,24 +176,13 @@ void ProcessRunnerService::monitor()
       std::lock_guard<std::mutex> lock(_process_runner_last_keep_alive_map_mtx);
       for (auto&& v : _process_runner_last_keep_alive_map) {
         auto stale_duration = std::chrono::duration_cast<std::chrono::seconds>(now - v.second).count();
-        if (stale_duration > 10) {
+        if (stale_duration > 3) {
           keys_to_delete.emplace_back(v.first);
         }
       }
     }
     for (auto&& key : keys_to_delete) {
       _signal_to_stop(key);
-    }
-    {
-      std::lock_guard<std::mutex> lock(_blocked_number_keep_block_map_mtx);
-      for (auto it = _blocked_number_keep_block_map.begin(); it != _blocked_number_keep_block_map.end();) {
-        auto stale_duration = std::chrono::duration_cast<std::chrono::seconds>(now - it->second).count();
-        if (stale_duration > 10) {
-          it = _blocked_number_keep_block_map.erase(it);
-        } else {
-          it++;
-        }
-      }
     }
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
@@ -243,20 +232,15 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
                                                const data_models::IsRunningRequest* request,
                                                data_models::IsRunningResponse* response)
 {
-  bool is_found = false;
   std::size_t key = request->key();
   bool is_running = false;
   std::optional<bool> ret_val = _is_running(key);
+  response->set_error_code(1);
   if (ret_val) {
-    is_found = true;
+    response->set_error_code(0);
     is_running = *ret_val;
   }
-  if (is_found) {
-    response->set_error_code(0);
-    response->set_value(is_running);
-  } else {
-    response->set_error_code(1);
-  }
+  response->set_value(is_running);
   response->set_key(key);
   return ::grpc::Status::OK;
 }
@@ -265,44 +249,31 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
                                                      const data_models::GetLastExitCodeRequest* request,
                                                      data_models::GetLastExitCodeResponse* response)
 {
-  bool is_found = false;
   std::size_t key = request->key();
-  int get_last_exit_code = 0;
+  int get_last_exit_code = -1;
   std::optional<int> ret_val = _get_last_exit_code(key);
+  response->set_error_code(1);
   if (ret_val) {
-    is_found = true;
+    response->set_error_code(0);
     get_last_exit_code = *ret_val;
   }
-  if (is_found) {
-    response->set_error_code(0);
-    response->set_value(get_last_exit_code);
-  } else {
-    response->set_error_code(1);
-  }
+  response->set_value(get_last_exit_code);
   response->set_key(key);
-
   return ::grpc::Status::OK;
 }
 
 ::grpc::Status ProcessRunnerService::GetId(::grpc::ServerContext* /*context*/, const data_models::GetIdRequest* request,
                                            data_models::GetIdResponse* response)
 {
-  bool is_found = false;
   std::size_t key = request->key();
-  int get_id = 0;
+  int get_id = -1;
   std::optional<int> ret_val = _get_id(key);
+  response->set_error_code(1);
   if (ret_val) {
-    is_found = true;
+    response->set_error_code(0);
     get_id = *ret_val;
   }
-
-  if (is_found) {
-    response->set_error_code(0);
-    response->set_value(get_id);
-  } else {
-    response->set_error_code(1);
-    response->set_value(get_id);
-  }
+  response->set_value(get_id);
   response->set_key(key);
 
   return ::grpc::Status::OK;
@@ -312,21 +283,15 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
                                                          const data_models::GetCompositeCommandRequest* request,
                                                          data_models::GetCompositeCommandResponse* response)
 {
-  bool is_found = false;
   std::size_t key = request->key();
   std::string get_composite_command;
   std::optional<std::string> ret_val = _get_composite_command(key);
+  response->set_error_code(1);
   if (ret_val) {
-    is_found = true;
+    response->set_error_code(0);
     get_composite_command = *ret_val;
   }
-
-  if (is_found) {
-    response->set_error_code(0);
-    response->set_value(get_composite_command);
-  } else {
-    response->set_error_code(1);
-  }
+  response->set_value(get_composite_command);
   response->set_key(key);
 
   return ::grpc::Status::OK;
@@ -336,20 +301,15 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
                                                          const data_models::GetInitialDirectoryRequest* request,
                                                          data_models::GetInitialDirectoryResponse* response)
 {
-  bool is_found = false;
   std::size_t key = request->key();
   std::string get_initial_directory;
   std::optional<std::string> ret_val = _get_initial_directory(key);
+  response->set_error_code(1);
   if (ret_val) {
-    is_found = true;
+    response->set_error_code(0);
     get_initial_directory = *ret_val;
   }
-  if (is_found) {
-    response->set_error_code(0);
-    response->set_value(get_initial_directory);
-  } else {
-    response->set_error_code(1);
-  }
+  response->set_value(get_initial_directory);
   response->set_key(key);
 
   return ::grpc::Status::OK;
@@ -361,6 +321,7 @@ bool ProcessRunnerService::_signal_to_stop(std::size_t key)
 {
   response->set_error_code(0);
   response->set_value(_application_installation_directory);
+  RAY_LOG_INF << "Returning Application installation directory: " << _application_installation_directory;
   return ::grpc::Status::OK;
 }
 

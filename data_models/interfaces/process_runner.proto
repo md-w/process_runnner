@@ -32,7 +32,8 @@ message RunProcessRequest
 {
   string command = 1;
   repeated string args = 2;
-  int32 number = 3;
+  // int32 number = 3; removed
+  string unique_id = 4;
 }
 
 // The response message containing the greetings
