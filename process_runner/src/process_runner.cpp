@@ -144,10 +144,37 @@ void ProcessRunner::run()
 
 int ProcessRunner::get_number() { return 0; } // TODO (Soumya)
 
-ProcessRunner::ProcessRunner() {}
-
-int ProcessRunner::run_once(std::string command, std::vector<std::string> args, std::string unique_id,
-                            std::string initial_directory)
+int ProcessRunner::run_once(const std::string& command, const std::vector<std::string>& args,
+                            const std::string& unique_id, const std::string& initial_directory)
 {
-  return 0;
+  std::unique_ptr<Poco::ProcessHandle> process_handle;
+  int last_exit_code = -1;
+  std::stringstream ss;
+  ss << "[";
+  ss << command;
+  for (const auto& piece : args) {
+    ss << " ";
+    ss << piece;
+  }
+  ss << "] unique_id: " << unique_id;
+  std::string composite_command = ss.str();
+  RAY_LOG_INF << "Starting process " << composite_command << " from: " << initial_directory;
+  try {
+    process_handle = std::make_unique<Poco::ProcessHandle>(Poco::Process::launch(command, args, initial_directory));
+  } catch (Poco::Exception& e) {
+    RAY_LOG_ERR << "Poco::Exception " << e.what();
+  } catch (const std::exception& e) {
+    RAY_LOG_ERR << e.what();
+  }
+  if (process_handle) {
+    if (process_handle->id() > 0) {
+      // last_exit_code = 0;
+      last_exit_code = process_handle->wait();
+      RAY_LOG_INF << "Process returned with:: " << last_exit_code;
+    }
+    process_handle = nullptr;
+  } else {
+    // break; keep on trying
+  }
+  return last_exit_code;
 }

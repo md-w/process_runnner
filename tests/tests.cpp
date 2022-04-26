@@ -96,6 +96,10 @@ TEST_CASE("get_usable_number_full_range_multithread", "[ProcessRunnerService]")
 
 TEST_CASE("process_runner_run_once", "[ProcessRunner]")
 {
-  std::unique_ptr<ProcessRunner> process_runner = std::make_unique<ProcessRunner>();
-  REQUIRE(process_runner->run_once("tar", {"-xvf", "temp"}) == 0);
+  std::string destination_dir = "source/evt_rec_1650953931_1650953986";
+  std::string dst_tar_path = fmt::format("{}.tar", destination_dir);
+
+  REQUIRE(ProcessRunner::run_once(
+              "tar", {"-C", fmt::format("./{}", destination_dir.substr(0, destination_dir.find_last_of('/'))), "-cvf",
+                      dst_tar_path, destination_dir.substr(destination_dir.find_last_of('/') + 1)}) == 0);
 }
