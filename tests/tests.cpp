@@ -4,8 +4,10 @@
 #include <memory>
 #include <thread>
 
+#include "process_runner.h"
 #include "process_runner_service.h"
 #include "utilities.h"
+
 
 TEST_CASE("ProcessRunnerArguments", "[protobuf]")
 {
@@ -90,4 +92,10 @@ TEST_CASE("get_usable_number_full_range_multithread", "[ProcessRunnerService]")
     int v = config->getInt(key);
     REQUIRE(key == Poco::NumberFormatter::format(v - (number_start - 1)));
   }
+}
+
+TEST_CASE("process_runner_run_once", "[ProcessRunner]")
+{
+  std::unique_ptr<ProcessRunner> process_runner = std::make_unique<ProcessRunner>();
+  REQUIRE(process_runner->run_once("tar", {"-xvf", "temp"}) == 0);
 }

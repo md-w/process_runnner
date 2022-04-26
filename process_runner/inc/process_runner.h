@@ -56,6 +56,9 @@ public:
 
   ProcessRunner(std::string command, std::vector<std::string> args, std::string unique_id = "",
                 std::string initial_directory = ProcessRunner::initial_directory);
+  ProcessRunner();
+  int run_once(std::string command, std::vector<std::string> args, std::string unique_id = "",
+               std::string initial_directory = ProcessRunner::initial_directory);
   virtual ~ProcessRunner();
   void signal_to_stop();
   bool is_running();

@@ -143,3 +143,11 @@ void ProcessRunner::run()
 }
 
 int ProcessRunner::get_number() { return 0; } // TODO (Soumya)
+
+ProcessRunner::ProcessRunner() {}
+
+int ProcessRunner::run_once(std::string command, std::vector<std::string> args, std::string unique_id,
+                            std::string initial_directory)
+{
+  return 0;
+}
