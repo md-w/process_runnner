@@ -37,8 +37,11 @@
 		"johnstoncode.svn-scm",
 		"humao.rest-client"
 	],
+	"containerEnv": {
+		"VCPKG_BINARY_SOURCES":"clear;files,${containerWorkspaceFolder}/../thirdparty/vcpkg_cache,readwrite"
+	},
 	"mounts": [
-		"source=${localWorkspaceFolder}/../thirdparty,target=/workspaces/thirdparty,type=bind,consistency=cached",
+		"source=${localWorkspaceFolder}/../thirdparty,target=${containerWorkspaceFolder}/../thirdparty,type=bind,consistency=cached",
 		// "source=${localEnv:HOME}${localEnv:USERPROFILE}/WorkFiles/thirdparty,target=/workspaces/thirdparty,type=bind,consistency=cached",
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
